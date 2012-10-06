@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 20-sep-2012 10:21:13 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="sakila" name="pe.com.hiper.sakila.shared.domain.mapping.Rental" table="rental">
+    <id name="rentalId" type="java.lang.Integer">
+      <column name="rental_id"/>
+      <generator class="identity"/>
+    </id>
+    <many-to-one class="pe.com.hiper.sakila.shared.domain.mapping.Staff" fetch="select" name="staff">
+      <column name="staff_id" not-null="true"/>
+    </many-to-one>
+    <many-to-one class="pe.com.hiper.sakila.shared.domain.mapping.Customer" fetch="select" name="customer">
+      <column name="customer_id" not-null="true"/>
+    </many-to-one>
+    <many-to-one class="pe.com.hiper.sakila.shared.domain.mapping.Inventory" fetch="select" name="inventory">
+      <column name="inventory_id" not-null="true"/>
+    </many-to-one>
+    <property name="rentalDate" type="timestamp">
+      <column length="19" name="rental_date" not-null="true"/>
+    </property>
+    <property name="returnDate" type="timestamp">
+      <column length="19" name="return_date"/>
+    </property>
+    <property name="lastUpdate" type="timestamp">
+      <column length="19" name="last_update" not-null="true"/>
+    </property>
+    <set inverse="true" name="payments">
+      <key>
+        <column name="rental_id"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.Payment"/>
+    </set>
+  </class>
+</hibernate-mapping>

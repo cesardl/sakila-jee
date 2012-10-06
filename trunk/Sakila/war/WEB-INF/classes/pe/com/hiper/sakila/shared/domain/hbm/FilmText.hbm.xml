@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 20-sep-2012 10:21:13 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="sakila" name="pe.com.hiper.sakila.shared.domain.mapping.FilmText" table="film_text">
+    <id name="filmId" type="short">
+      <column name="film_id"/>
+      <generator class="assigned"/>
+    </id>
+    <property name="title" type="string">
+      <column name="title" not-null="true"/>
+    </property>
+    <property name="description" type="string">
+      <column length="65535" name="description"/>
+    </property>
+  </class>
+</hibernate-mapping>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 20-sep-2012 10:21:13 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="sakila" name="pe.com.hiper.sakila.shared.domain.mapping.Staff" table="staff">
+    <id name="staffId" type="java.lang.Byte">
+      <column name="staff_id"/>
+      <generator class="identity"/>
+    </id>
+    <many-to-one class="pe.com.hiper.sakila.shared.domain.mapping.Address" fetch="select" name="address">
+      <column name="address_id" not-null="true"/>
+    </many-to-one>
+    <many-to-one class="pe.com.hiper.sakila.shared.domain.mapping.Store" fetch="select" name="store">
+      <column name="store_id" not-null="true"/>
+    </many-to-one>
+    <property name="firstName" type="string">
+      <column length="45" name="first_name" not-null="true"/>
+    </property>
+    <property name="lastName" type="string">
+      <column length="45" name="last_name" not-null="true"/>
+    </property>
+    <property name="picture" type="binary">
+      <column name="picture"/>
+    </property>
+    <property name="email" type="string">
+      <column length="50" name="email"/>
+    </property>
+    <property name="active" type="boolean">
+      <column name="active" not-null="true"/>
+    </property>
+    <property name="username" type="string">
+      <column length="16" name="username" not-null="true"/>
+    </property>
+    <property name="password" type="string">
+      <column length="40" name="password"/>
+    </property>
+    <property name="lastUpdate" type="timestamp">
+      <column length="19" name="last_update" not-null="true"/>
+    </property>
+    <set inverse="true" name="rentals">
+      <key>
+        <column name="staff_id" not-null="true"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.Rental"/>
+    </set>
+    <set inverse="true" name="payments">
+      <key>
+        <column name="staff_id" not-null="true"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.Payment"/>
+    </set>
+    <set inverse="true" name="stores">
+      <key>
+        <column name="manager_staff_id" not-null="true" unique="true"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.Store"/>
+    </set>
+  </class>
+</hibernate-mapping>

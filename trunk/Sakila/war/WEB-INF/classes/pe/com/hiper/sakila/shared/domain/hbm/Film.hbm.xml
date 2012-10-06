@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 20-sep-2012 10:21:13 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="sakila" name="pe.com.hiper.sakila.shared.domain.mapping.Film" table="film">
+    <id name="filmId" type="java.lang.Short">
+      <column name="film_id"/>
+      <generator class="identity"/>
+    </id>
+    <many-to-one class="pe.com.hiper.sakila.shared.domain.mapping.Language" fetch="select" name="languageByOriginalLanguageId">
+      <column name="original_language_id"/>
+    </many-to-one>
+    <many-to-one class="pe.com.hiper.sakila.shared.domain.mapping.Language" fetch="select" name="languageByLanguageId">
+      <column name="language_id" not-null="true"/>
+    </many-to-one>
+    <property name="title" type="string">
+      <column name="title" not-null="true"/>
+    </property>
+    <property name="description" type="string">
+      <column length="65535" name="description"/>
+    </property>
+    <property name="releaseYear" type="date">
+      <column length="0" name="release_year"/>
+    </property>
+    <property name="rentalDuration" type="byte">
+      <column name="rental_duration" not-null="true"/>
+    </property>
+    <property name="rentalRate" type="big_decimal">
+      <column name="rental_rate" not-null="true" precision="4"/>
+    </property>
+    <property name="length" type="java.lang.Short">
+      <column name="length"/>
+    </property>
+    <property name="replacementCost" type="big_decimal">
+      <column name="replacement_cost" not-null="true" precision="5"/>
+    </property>
+    <property name="rating" type="string">
+      <column length="5" name="rating"/>
+    </property>
+    <property name="specialFeatures" type="string">
+      <column length="54" name="special_features"/>
+    </property>
+    <property name="lastUpdate" type="timestamp">
+      <column length="19" name="last_update" not-null="true"/>
+    </property>
+    <set inverse="true" name="filmActors">
+      <key>
+        <column name="film_id" not-null="true"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.FilmActor"/>
+    </set>
+    <set inverse="true" name="filmCategories">
+      <key>
+        <column name="film_id" not-null="true"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.FilmCategory"/>
+    </set>
+    <set inverse="true" name="inventories">
+      <key>
+        <column name="film_id" not-null="true"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.Inventory"/>
+    </set>
+  </class>
+</hibernate-mapping>

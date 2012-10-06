@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 20-sep-2012 10:21:13 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="sakila" name="pe.com.hiper.sakila.shared.domain.mapping.Category" table="category">
+    <id name="categoryId" type="java.lang.Byte">
+      <column name="category_id"/>
+      <generator class="identity"/>
+    </id>
+    <property name="name" type="string">
+      <column length="25" name="name" not-null="true"/>
+    </property>
+    <property name="lastUpdate" type="timestamp">
+      <column length="19" name="last_update" not-null="true"/>
+    </property>
+    <set inverse="true" name="filmCategories">
+      <key>
+        <column name="category_id" not-null="true"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.FilmCategory"/>
+    </set>
+  </class>
+</hibernate-mapping>

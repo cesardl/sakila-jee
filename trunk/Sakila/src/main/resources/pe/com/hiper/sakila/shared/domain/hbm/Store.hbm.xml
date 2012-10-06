@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 20-sep-2012 10:21:13 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="sakila" name="pe.com.hiper.sakila.shared.domain.mapping.Store" table="store">
+    <id name="storeId" type="java.lang.Byte">
+      <column name="store_id"/>
+      <generator class="identity"/>
+    </id>
+    <many-to-one class="pe.com.hiper.sakila.shared.domain.mapping.Staff" fetch="select" name="staff">
+      <column name="manager_staff_id" not-null="true" unique="true"/>
+    </many-to-one>
+    <many-to-one class="pe.com.hiper.sakila.shared.domain.mapping.Address" fetch="select" name="address">
+      <column name="address_id" not-null="true"/>
+    </many-to-one>
+    <property name="lastUpdate" type="timestamp">
+      <column length="19" name="last_update" not-null="true"/>
+    </property>
+    <set inverse="true" name="inventories">
+      <key>
+        <column name="store_id" not-null="true"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.Inventory"/>
+    </set>
+    <set inverse="true" name="customers">
+      <key>
+        <column name="store_id" not-null="true"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.Customer"/>
+    </set>
+    <set inverse="true" name="staffs">
+      <key>
+        <column name="store_id" not-null="true"/>
+      </key>
+      <one-to-many class="pe.com.hiper.sakila.shared.domain.mapping.Staff"/>
+    </set>
+  </class>
+</hibernate-mapping>
