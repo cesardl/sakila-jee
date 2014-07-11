@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-reverse-engineering-3.0.dtd" >
+
+<hibernate-reverse-engineering>
+  <table-filter match-catalog="sakila" match-name="actor"/>
+  <table-filter match-catalog="sakila" match-name="actor_info"/>
+  <table-filter match-catalog="sakila" match-name="address"/>
+  <table-filter match-catalog="sakila" match-name="category"/>
+  <table-filter match-catalog="sakila" match-name="city"/>
+  <table-filter match-catalog="sakila" match-name="country"/>
+  <table-filter match-catalog="sakila" match-name="customer"/>
+  <table-filter match-catalog="sakila" match-name="customer_list"/>
+  <table-filter match-catalog="sakila" match-name="film"/>
+  <table-filter match-catalog="sakila" match-name="film_actor"/>
+  <table-filter match-catalog="sakila" match-name="film_category"/>
+  <table-filter match-catalog="sakila" match-name="film_list"/>
+  <table-filter match-catalog="sakila" match-name="film_text"/>
+  <table-filter match-catalog="sakila" match-name="inventory"/>
+  <table-filter match-catalog="sakila" match-name="language"/>
+  <table-filter match-catalog="sakila" match-name="nicer_but_slower_film_list"/>
+  <table-filter match-catalog="sakila" match-name="payment"/>
+  <table-filter match-catalog="sakila" match-name="rental"/>
+  <table-filter match-catalog="sakila" match-name="sales_by_film_category"/>
+  <table-filter match-catalog="sakila" match-name="sales_by_store"/>
+  <table-filter match-catalog="sakila" match-name="staff"/>
+  <table-filter match-catalog="sakila" match-name="staff_list"/>
+  <table-filter match-catalog="sakila" match-name="store"/>
+</hibernate-reverse-engineering>
