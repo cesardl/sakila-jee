@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<jboss-web>
-	<context-root>/sakila</context-root>
-	<class-loading>
-		<loader-repository>sakila:archive=sakila.war</loader-repository>
-	</class-loading>
-</jboss-web>
