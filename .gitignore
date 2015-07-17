@@ -1,0 +1,23 @@
+target/
+
+# Eclipse
+.settings/
+.classpath
+.project
+
+# NetBeans
+nb-configuration.xml
+nbactions.xml
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# STS
+.springBeans
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# Others
+.gwt/
