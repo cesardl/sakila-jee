@@ -7,8 +7,17 @@ package org.sanmarcux.samples.sboot.sakila.entities;
  */
 public class DTOIntActor {
 
+    private Short actorId;
     private String firstName;
     private String lastName;
+
+    public Short getActorId() {
+        return actorId;
+    }
+
+    public void setActorId(Short actorId) {
+        this.actorId = actorId;
+    }
 
     public String getFirstName() {
         return firstName;

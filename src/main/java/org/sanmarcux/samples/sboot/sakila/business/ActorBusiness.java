@@ -3,7 +3,6 @@ package org.sanmarcux.samples.sboot.sakila.business;
 import org.sanmarcux.samples.sboot.sakila.entities.DTOIntActor;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Created on 21/04/2018.
@@ -12,11 +11,13 @@ import java.util.Optional;
  */
 public interface ActorBusiness {
 
-    List<DTOIntActor> all();
+    List<DTOIntActor> list();
 
-    DTOIntActor save(DTOIntActor actor);
+    DTOIntActor create(DTOIntActor actor);
 
-    Optional<DTOIntActor> findById(Short actorId);
+    DTOIntActor modify(Short actorId, DTOIntActor payload);
 
-    void deleteById(Short actorId);
+    DTOIntActor get(Short actorId);
+
+    void delete(Short actorId);
 }
