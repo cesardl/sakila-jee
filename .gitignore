@@ -1,23 +1,25 @@
-target/
+/target/
+!.mvn/wrapper/maven-wrapper.jar
 
-# Eclipse
-.settings/
+### STS ###
+.apt_generated
 .classpath
+.factorypath
 .project
-
-# NetBeans
-nb-configuration.xml
-nbactions.xml
-
-# IntelliJ IDEA
-.idea/
-*.iml
-
-# STS
+.settings
 .springBeans
+.sts4-cache
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
 
-# Others
-.gwt/
+### NetBeans ###
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
