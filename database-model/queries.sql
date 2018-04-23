@@ -4,3 +4,5 @@ from sakila.actor actor0_ where actor0_.actor_id=122;
 select filmactors0_.actor_id as actor_id1_9_0_, filmactors0_.film_id as film_id2_9_0_, filmactors0_.actor_id as actor_id1_9_1_,
   filmactors0_.film_id as film_id2_9_1_, filmactors0_.last_update as last_upd3_9_1_
 from sakila.film_actor filmactors0_ where filmactors0_.actor_id=122;
+
+select sha1('admin'), sha1('mike');

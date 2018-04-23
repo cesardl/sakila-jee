@@ -13,7 +13,7 @@ public interface ActorBusiness {
 
     List<DTOIntActor> list();
 
-    DTOIntActor create(DTOIntActor actor);
+    DTOIntActor create(DTOIntActor payload);
 
     DTOIntActor modify(Short actorId, DTOIntActor payload);
 

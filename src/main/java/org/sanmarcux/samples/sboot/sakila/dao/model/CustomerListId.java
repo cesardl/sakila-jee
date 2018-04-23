@@ -77,7 +77,7 @@ public class CustomerListId implements java.io.Serializable {
         this.address = address;
     }
 
-    @Column(name = "zip code", length = 10)
+    @Column(name = "zipCode", length = 10)
     public String getZipCode() {
         return this.zipCode;
     }
