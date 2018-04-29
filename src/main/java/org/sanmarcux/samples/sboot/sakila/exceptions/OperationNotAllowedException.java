@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class OperationNotAllowedException extends RuntimeException {
 
+    private static final long serialVersionUID = 3817729211331814408L;
+
     public OperationNotAllowedException() {
         super();
     }

@@ -22,9 +22,7 @@ public interface ActorBusiness {
 
     void delete(Short actorId);
 
-    List<DTOFilm> listFilms(Short actorId);
-
-    DTOFilm createFilm(Short actorId, DTOFilm payload);
+    void createFilmParticipation(Short actorId, Short payload);
 
     DTOFilm getFilm(Short actorId, Short filmId);
 

@@ -187,7 +187,7 @@ public class Film implements java.io.Serializable {
     }
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "last_update", nullable = false, length = 19)
+    @Column(name = "last_update", nullable = false, insertable = false, length = 19)
     public Date getLastUpdate() {
         return this.lastUpdate;
     }

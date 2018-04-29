@@ -4,6 +4,7 @@ import org.sanmarcux.samples.sboot.sakila.dao.model.Film;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -12,8 +13,9 @@ import java.util.List;
  *
  * @author Cesardl
  */
+@Transactional
 public interface FilmRepository extends JpaRepository<Film, Short> {
 
-    @Query(value = "select * from film f inner join film_actor fa on f.film_id = fa.film_id where fa.actor_id = :actorId", nativeQuery = true)
+    @Query(value = "select f.* from film f inner join film_actor fa on f.film_id = fa.film_id where fa.actor_id = :actorId", nativeQuery = true)
     List<Film> findAllByActor(@Param("actorId") Short actorId);
 }

@@ -4,13 +4,12 @@ import org.modelmapper.ModelMapper;
 import org.sanmarcux.samples.sboot.sakila.business.ActorBusiness;
 import org.sanmarcux.samples.sboot.sakila.dao.ActorRepository;
 import org.sanmarcux.samples.sboot.sakila.dao.FilmActorRepository;
-import org.sanmarcux.samples.sboot.sakila.dao.FilmRepository;
-import org.sanmarcux.samples.sboot.sakila.dao.LanguageRepository;
-import org.sanmarcux.samples.sboot.sakila.dao.model.*;
+import org.sanmarcux.samples.sboot.sakila.dao.model.Actor;
+import org.sanmarcux.samples.sboot.sakila.dao.model.FilmActor;
+import org.sanmarcux.samples.sboot.sakila.dao.model.FilmActorId;
 import org.sanmarcux.samples.sboot.sakila.dto.DTOActor;
 import org.sanmarcux.samples.sboot.sakila.dto.DTOFilm;
 import org.sanmarcux.samples.sboot.sakila.exceptions.ActorNotFoundException;
-import org.sanmarcux.samples.sboot.sakila.exceptions.LanguageNotFoundException;
 import org.sanmarcux.samples.sboot.sakila.exceptions.OperationNotAllowedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,20 +28,15 @@ import java.util.stream.StreamSupport;
 public class ActorBusinessImpl implements ActorBusiness {
 
     private ActorRepository actorRepository;
-    private FilmRepository filmRepository;
     private FilmActorRepository filmActorRepository;
-    private LanguageRepository languageRepository;
 
     private ModelMapper modelMapper;
 
     @Autowired
-    private ActorBusinessImpl(ActorRepository actorRepository, FilmRepository filmRepository,
-                              FilmActorRepository filmActorRepository,
-                              LanguageRepository languageRepository, ModelMapper modelMapper) {
+    private ActorBusinessImpl(ActorRepository actorRepository, FilmActorRepository filmActorRepository,
+                              ModelMapper modelMapper) {
         this.actorRepository = actorRepository;
-        this.filmRepository = filmRepository;
         this.filmActorRepository = filmActorRepository;
-        this.languageRepository = languageRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -95,33 +89,10 @@ public class ActorBusinessImpl implements ActorBusiness {
     }
 
     @Override
-    public List<DTOFilm> listFilms(final Short actorId) {
-        List<Film> films = filmRepository.findAllByActor(actorId);
-
-        return films.stream().map(film -> modelMapper.map(film, DTOFilm.class)).collect(Collectors.toList());
-    }
-
-    @Override
-    public DTOFilm createFilm(final Short actorId, final DTOFilm payload) {
-        if (payload.getFilmId() != null) {
-            throw new OperationNotAllowedException();
-        }
-
-        Actor actor = actorRepository.findById(actorId)
-                .orElseThrow(() -> new ActorNotFoundException(actorId));
-
-        Film filmToSave = modelMapper.map(payload, Film.class);
-        Language language = languageRepository.findById(Integer.valueOf(1).byteValue())
-                .orElseThrow(LanguageNotFoundException::new);
-        filmToSave.setLanguageByLanguageId(language);
-
-        Film savedFilm = filmRepository.save(filmToSave);
-
+    public void createFilmParticipation(final Short actorId, final Short filmId) {
         FilmActor filmActor = new FilmActor();
-        filmActor.setId(new FilmActorId(actor.getActorId(), savedFilm.getFilmId()));
+        filmActor.setId(new FilmActorId(actorId, filmId));
         filmActorRepository.save(filmActor);
-
-        return modelMapper.map(savedFilm, DTOFilm.class);
     }
 
     @Override

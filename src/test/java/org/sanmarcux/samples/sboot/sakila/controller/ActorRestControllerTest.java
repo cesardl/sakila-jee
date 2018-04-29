@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.charset.Charset;
 
@@ -72,18 +71,20 @@ public class ActorRestControllerTest {
     }
 
     @Test
-    public void createAndDeleteFilm() throws Exception {
-        DTOFilm film = new DTOFilm();
-        film.setTitle("Dummy film");
-        film.setDescription("Description of film created by integration test");
+    public void createActorParticipationInFilm() throws Exception {
+//        DTOFilm film = new DTOFilm();
+//        film.setTitle("Dummy film");
+//        film.setDescription("Description of film created by integration test");
+//        film.setRentalRate(BigDecimal.valueOf(1, 12));
+//        film.setReplacementCost(BigDecimal.valueOf(33,12));
 
-        MvcResult result = this.mockMvc.perform(post("/actors/" + actorId + "/films")
+        this.mockMvc.perform(put("/actors/" + actorId + "/films/3")
                 .contentType(contentType)
-                .content(objectMapper.writeValueAsString(film)))
-                .andExpect(status().isCreated())
+                .content(objectMapper.writeValueAsString(new DTOFilm())))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        this.mockMvc.perform(delete(result.getResponse().getHeader("Location")))
+        this.mockMvc.perform(delete("/actors/" + actorId + "/films/3"))
                 .andExpect(status().isOk());
     }
 }

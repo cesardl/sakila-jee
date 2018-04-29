@@ -1,5 +1,9 @@
 package org.sanmarcux.samples.sboot.sakila.dto;
 
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.Date;
+
 /**
  * Created on 22/04/2018.
  *
@@ -10,6 +14,11 @@ public class DTOFilm {
     private Short filmId;
     private String title;
     private String description;
+    private Date releaseYear;
+    @NotNull
+    private BigDecimal rentalRate;
+    @NotNull
+    private BigDecimal replacementCost;
 
     public Short getFilmId() {
         return filmId;
@@ -33,5 +42,29 @@ public class DTOFilm {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Date getReleaseYear() {
+        return releaseYear;
+    }
+
+    public void setReleaseYear(Date releaseYear) {
+        this.releaseYear = releaseYear;
+    }
+
+    public BigDecimal getRentalRate() {
+        return rentalRate;
+    }
+
+    public void setRentalRate(BigDecimal rentalRate) {
+        this.rentalRate = rentalRate;
+    }
+
+    public BigDecimal getReplacementCost() {
+        return replacementCost;
+    }
+
+    public void setReplacementCost(BigDecimal replacementCost) {
+        this.replacementCost = replacementCost;
     }
 }
