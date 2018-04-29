@@ -50,7 +50,7 @@ public class FilmActor implements java.io.Serializable {
         this.actor = actor;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "film_id", nullable = false, insertable = false, updatable = false)
     public Film getFilm() {
         return this.film;

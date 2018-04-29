@@ -1,11 +1,11 @@
-package org.sanmarcux.samples.sboot.sakila.entities;
+package org.sanmarcux.samples.sboot.sakila.dto;
 
 /**
  * Created on 21/04/2018.
  *
  * @author Cesardl
  */
-public class DTOIntActor {
+public class DTOActor {
 
     private Short actorId;
     private String firstName;

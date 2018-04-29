@@ -31,8 +31,7 @@ public class City implements java.io.Serializable {
         this.lastUpdate = lastUpdate;
     }
 
-    public City(Country country, String city, Date lastUpdate,
-                List<Address> addresses) {
+    public City(Country country, String city, Date lastUpdate, List<Address> addresses) {
         this.country = country;
         this.city = city;
         this.lastUpdate = lastUpdate;
