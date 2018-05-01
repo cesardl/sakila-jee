@@ -7,6 +7,7 @@ import org.sanmarcux.samples.sboot.sakila.dao.LanguageRepository;
 import org.sanmarcux.samples.sboot.sakila.dao.model.Film;
 import org.sanmarcux.samples.sboot.sakila.dao.model.Language;
 import org.sanmarcux.samples.sboot.sakila.dto.DTOFilm;
+import org.sanmarcux.samples.sboot.sakila.exceptions.FilmNotFoundException;
 import org.sanmarcux.samples.sboot.sakila.exceptions.LanguageNotFoundException;
 import org.sanmarcux.samples.sboot.sakila.exceptions.OperationNotAllowedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,4 +70,10 @@ public class FilmBusinessImpl implements FilmBusiness {
         return films.stream().map(film -> modelMapper.map(film, DTOFilm.class)).collect(Collectors.toList());
     }
 
+    @Override
+    public DTOFilm get(final Short filmId) {
+        return filmRepository.findById(filmId)
+                .map(film -> modelMapper.map(film, DTOFilm.class))
+                .orElseThrow(() -> new FilmNotFoundException(filmId));
+    }
 }

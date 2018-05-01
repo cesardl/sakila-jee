@@ -1,5 +1,7 @@
 package org.sanmarcux.samples.sboot.sakila.dto;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Created on 21/04/2018.
  *
@@ -8,7 +10,11 @@ package org.sanmarcux.samples.sboot.sakila.dto;
 public class DTOActor {
 
     private Short actorId;
+
+    @NotNull
     private String firstName;
+
+    @NotNull
     private String lastName;
 
     public Short getActorId() {

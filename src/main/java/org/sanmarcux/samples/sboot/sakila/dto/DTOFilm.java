@@ -15,8 +15,10 @@ public class DTOFilm {
     private String title;
     private String description;
     private Date releaseYear;
+
     @NotNull
     private BigDecimal rentalRate;
+
     @NotNull
     private BigDecimal replacementCost;
 

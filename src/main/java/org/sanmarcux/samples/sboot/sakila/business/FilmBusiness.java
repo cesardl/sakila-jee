@@ -16,4 +16,6 @@ public interface FilmBusiness {
     DTOFilm create(DTOFilm payload);
 
     List<DTOFilm> findFilmsByActor(Short actorId);
+
+    DTOFilm get(Short filmId);
 }

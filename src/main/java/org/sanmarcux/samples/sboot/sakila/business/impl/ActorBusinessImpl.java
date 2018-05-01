@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -62,14 +61,8 @@ public class ActorBusinessImpl implements ActorBusiness {
 
     @Override
     public DTOActor modify(final Short actorId, final DTOActor payload) {
-        Optional<Actor> actorOptional = actorRepository.findById(actorId);
-
-        Actor actor = actorOptional.map(
-                a -> {
-                    modelMapper.map(payload, a);
-                    return a;
-                })
-                .orElseThrow(() -> new ActorNotFoundException(actorId));
+        Actor actor = modelMapper.map(payload, Actor.class);
+        actor.setActorId(actorId);
 
         actorRepository.save(actor);
 

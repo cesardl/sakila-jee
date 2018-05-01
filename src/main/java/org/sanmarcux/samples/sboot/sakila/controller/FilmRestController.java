@@ -50,4 +50,10 @@ public class FilmRestController {
 
         return ResponseEntity.created(location).build();
     }
+
+    @GetMapping("/{filmId}")
+    public DTOFilm getFilm(@PathVariable Short filmId) {
+        LOG.info("Invoking Rest Service getFilm");
+        return filmBusiness.get(filmId);
+    }
 }
