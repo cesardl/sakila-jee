@@ -17,9 +17,11 @@ before_script:
   - ./cc-test-reporter before-build
 
 script:
-  - mvn clean verify -DskipTests
+  - mvn clean verify
 
 after_script:
   - export JACOCO_SOURCE_PATH=src/main/java
+  - echo $JACOCO_SOURCE_PATH
   - ./cc-test-reporter format-coverage target/site/jacoco/jacoco.xml --input-type jacoco --debug
+  - ls -lha .
   - ./cc-test-reporter upload-coverage --debug
