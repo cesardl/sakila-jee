@@ -2,8 +2,8 @@ package org.sanmarcux.samples.sboot.sakila.business;
 
 import org.sanmarcux.samples.sboot.sakila.dto.ActorDTO;
 import org.sanmarcux.samples.sboot.sakila.dto.FilmDTO;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Created on 21/04/2018.
@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface ActorBusiness {
 
-    List<ActorDTO> list();
+    Page<ActorDTO> list(Pageable pageable);
 
     ActorDTO create(ActorDTO payload);
 
