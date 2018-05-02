@@ -11,11 +11,13 @@ import org.sanmarcux.samples.sboot.sakila.exceptions.FilmNotFoundException;
 import org.sanmarcux.samples.sboot.sakila.exceptions.LanguageNotFoundException;
 import org.sanmarcux.samples.sboot.sakila.exceptions.OperationNotAllowedException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Created on 29/04/2018.
@@ -39,12 +41,14 @@ public class FilmBusinessImpl implements FilmBusiness {
     }
 
     @Override
-    public List<FilmDTO> list() {
-        Iterable<Film> iterable = filmRepository.findAll();
+    public Page<FilmDTO> list(final Pageable pageable) {
+        Page<Film> films = filmRepository.findAll(pageable);
 
-        return StreamSupport.stream(iterable.spliterator(), false)
-                .map(actor -> modelMapper.map(actor, FilmDTO.class))
-                .collect(Collectors.toList());
+        return new PageImpl<>(
+                films.stream()
+                        .map(film -> modelMapper.map(film, FilmDTO.class))
+                        .collect(Collectors.toList()),
+                films.getPageable(), films.getTotalElements());
     }
 
     @Override

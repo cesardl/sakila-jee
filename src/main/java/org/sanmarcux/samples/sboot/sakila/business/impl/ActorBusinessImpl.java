@@ -12,11 +12,12 @@ import org.sanmarcux.samples.sboot.sakila.dto.FilmDTO;
 import org.sanmarcux.samples.sboot.sakila.exceptions.ActorNotFoundException;
 import org.sanmarcux.samples.sboot.sakila.exceptions.OperationNotAllowedException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Created on 21/04/2018.
@@ -40,12 +41,14 @@ public class ActorBusinessImpl implements ActorBusiness {
     }
 
     @Override
-    public List<ActorDTO> list() {
-        Iterable<Actor> iterable = actorRepository.findAll();
+    public Page<ActorDTO> list(final Pageable pageable) {
+        Page<Actor> actors = actorRepository.findAll(pageable);
 
-        return StreamSupport.stream(iterable.spliterator(), false)
-                .map(actor -> modelMapper.map(actor, ActorDTO.class))
-                .collect(Collectors.toList());
+        return new PageImpl<>(
+                actors.stream()
+                        .map(actor -> modelMapper.map(actor, ActorDTO.class))
+                        .collect(Collectors.toList()),
+                actors.getPageable(), actors.getTotalElements());
     }
 
     @Override
