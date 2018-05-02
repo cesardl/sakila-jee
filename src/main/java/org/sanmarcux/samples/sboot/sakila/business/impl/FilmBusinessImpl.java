@@ -6,7 +6,7 @@ import org.sanmarcux.samples.sboot.sakila.dao.FilmRepository;
 import org.sanmarcux.samples.sboot.sakila.dao.LanguageRepository;
 import org.sanmarcux.samples.sboot.sakila.dao.model.Film;
 import org.sanmarcux.samples.sboot.sakila.dao.model.Language;
-import org.sanmarcux.samples.sboot.sakila.dto.DTOFilm;
+import org.sanmarcux.samples.sboot.sakila.dto.FilmDTO;
 import org.sanmarcux.samples.sboot.sakila.exceptions.FilmNotFoundException;
 import org.sanmarcux.samples.sboot.sakila.exceptions.LanguageNotFoundException;
 import org.sanmarcux.samples.sboot.sakila.exceptions.OperationNotAllowedException;
@@ -39,41 +39,41 @@ public class FilmBusinessImpl implements FilmBusiness {
     }
 
     @Override
-    public List<DTOFilm> list() {
+    public List<FilmDTO> list() {
         Iterable<Film> iterable = filmRepository.findAll();
 
         return StreamSupport.stream(iterable.spliterator(), false)
-                .map(actor -> modelMapper.map(actor, DTOFilm.class))
+                .map(actor -> modelMapper.map(actor, FilmDTO.class))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public DTOFilm create(final DTOFilm payload) {
+    public FilmDTO create(final FilmDTO payload) {
         if (payload.getFilmId() != null) {
             throw new OperationNotAllowedException();
         }
 
         Film filmToSave = modelMapper.map(payload, Film.class);
-        Language language = languageRepository.findById(Integer.valueOf(1).byteValue())
+        Language language = languageRepository.findById(payload.getLanguage().getId().byteValue())
                 .orElseThrow(LanguageNotFoundException::new);
         filmToSave.setLanguageByLanguageId(language);
 
         filmRepository.save(filmToSave);
 
-        return modelMapper.map(filmToSave, DTOFilm.class);
+        return modelMapper.map(filmToSave, FilmDTO.class);
     }
 
     @Override
-    public List<DTOFilm> findFilmsByActor(final Short actorId) {
+    public List<FilmDTO> findFilmsByActor(final Short actorId) {
         List<Film> films = filmRepository.findAllByActor(actorId);
 
-        return films.stream().map(film -> modelMapper.map(film, DTOFilm.class)).collect(Collectors.toList());
+        return films.stream().map(film -> modelMapper.map(film, FilmDTO.class)).collect(Collectors.toList());
     }
 
     @Override
-    public DTOFilm get(final Short filmId) {
+    public FilmDTO get(final Short filmId) {
         return filmRepository.findById(filmId)
-                .map(film -> modelMapper.map(film, DTOFilm.class))
+                .map(film -> modelMapper.map(film, FilmDTO.class))
                 .orElseThrow(() -> new FilmNotFoundException(filmId));
     }
 }

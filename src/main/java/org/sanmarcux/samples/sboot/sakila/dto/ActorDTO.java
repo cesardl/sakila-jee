@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Cesardl
  */
-public class DTOActor {
+public class ActorDTO {
 
     private Short actorId;
 

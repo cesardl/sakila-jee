@@ -34,7 +34,7 @@ public class Actor implements java.io.Serializable {
     @Column(name = "last_update", nullable = false, length = 19)
     private Date lastUpdate;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "actor")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "actor")
     private List<FilmActor> filmActors;
 
     public Actor() {

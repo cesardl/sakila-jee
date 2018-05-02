@@ -2,8 +2,8 @@ package org.sanmarcux.samples.sboot.sakila.controller;
 
 import org.sanmarcux.samples.sboot.sakila.business.ActorBusiness;
 import org.sanmarcux.samples.sboot.sakila.business.FilmBusiness;
-import org.sanmarcux.samples.sboot.sakila.dto.DTOActor;
-import org.sanmarcux.samples.sboot.sakila.dto.DTOFilm;
+import org.sanmarcux.samples.sboot.sakila.dto.ActorDTO;
+import org.sanmarcux.samples.sboot.sakila.dto.FilmDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +41,9 @@ public class ActorRestController {
      * @return actors
      */
     @GetMapping
-    public ResponseEntity<List<DTOActor>> listActors() {
+    public ResponseEntity<List<ActorDTO>> listActors() {
         LOG.info("Invoking Rest Service listActors");
-        List<DTOActor> actors = actorBusiness.list();
+        List<ActorDTO> actors = actorBusiness.list();
         if (actors.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -57,10 +57,10 @@ public class ActorRestController {
      * @return a created actor
      */
     @PostMapping
-    public ResponseEntity<?> createActor(@Valid @RequestBody final DTOActor payload) {
+    public ResponseEntity<?> createActor(@Valid @RequestBody final ActorDTO payload) {
         LOG.info("Invoking Rest Service createActor");
 
-        DTOActor result = actorBusiness.create(payload);
+        ActorDTO result = actorBusiness.create(payload);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{actorId}")
@@ -76,7 +76,7 @@ public class ActorRestController {
      * @return an actor
      */
     @GetMapping("/{actorId}")
-    public DTOActor getActor(@PathVariable Short actorId) {
+    public ActorDTO getActor(@PathVariable Short actorId) {
         LOG.info("Invoking Rest Service getActor");
         return actorBusiness.get(actorId);
     }
@@ -89,7 +89,7 @@ public class ActorRestController {
      * @return a modified actor
      */
     @PatchMapping("/{actorId}")
-    public DTOActor modifyActor(@PathVariable final Short actorId, @RequestBody final DTOActor payload) {
+    public ActorDTO modifyActor(@PathVariable final Short actorId, @RequestBody final ActorDTO payload) {
         LOG.info("Invoking Rest Service modifyActor");
         return actorBusiness.modify(actorId, payload);
     }
@@ -108,9 +108,9 @@ public class ActorRestController {
     }
 
     @GetMapping("/{actorId}/films")
-    public ResponseEntity<List<DTOFilm>> listActorFilms(@PathVariable final Short actorId) {
+    public ResponseEntity<List<FilmDTO>> listActorFilms(@PathVariable final Short actorId) {
         LOG.info("Invoking Rest Service listActorFilms");
-        List<DTOFilm> films = filmBusiness.findFilmsByActor(actorId);
+        List<FilmDTO> films = filmBusiness.findFilmsByActor(actorId);
         if (films.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -118,14 +118,14 @@ public class ActorRestController {
     }
 
     @GetMapping("/{actorId}/films/{filmId}")
-    public DTOFilm getActorFilm(@PathVariable final Short actorId, @PathVariable final Short filmId) {
+    public FilmDTO getActorFilm(@PathVariable final Short actorId, @PathVariable final Short filmId) {
         LOG.info("Invoking Rest Service getActorFilm");
 
         return actorBusiness.getFilm(actorId, filmId);
     }
 
     @PutMapping("/{actorId}/films/{filmId}")
-    public ResponseEntity<?> modifyActorFilm(@PathVariable final Short actorId, @PathVariable final Short filmId, @RequestBody final DTOFilm payload) {
+    public ResponseEntity<?> modifyActorFilm(@PathVariable final Short actorId, @PathVariable final Short filmId, @RequestBody final FilmDTO payload) {
         LOG.info("Invoking Rest Service modifyActorFilm");
 
         actorBusiness.createFilmParticipation(actorId, filmId);

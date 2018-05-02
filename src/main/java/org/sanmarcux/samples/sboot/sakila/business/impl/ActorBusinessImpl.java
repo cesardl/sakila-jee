@@ -7,8 +7,8 @@ import org.sanmarcux.samples.sboot.sakila.dao.FilmActorRepository;
 import org.sanmarcux.samples.sboot.sakila.dao.model.Actor;
 import org.sanmarcux.samples.sboot.sakila.dao.model.FilmActor;
 import org.sanmarcux.samples.sboot.sakila.dao.model.FilmActorId;
-import org.sanmarcux.samples.sboot.sakila.dto.DTOActor;
-import org.sanmarcux.samples.sboot.sakila.dto.DTOFilm;
+import org.sanmarcux.samples.sboot.sakila.dto.ActorDTO;
+import org.sanmarcux.samples.sboot.sakila.dto.FilmDTO;
 import org.sanmarcux.samples.sboot.sakila.exceptions.ActorNotFoundException;
 import org.sanmarcux.samples.sboot.sakila.exceptions.OperationNotAllowedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,39 +40,39 @@ public class ActorBusinessImpl implements ActorBusiness {
     }
 
     @Override
-    public List<DTOActor> list() {
+    public List<ActorDTO> list() {
         Iterable<Actor> iterable = actorRepository.findAll();
 
         return StreamSupport.stream(iterable.spliterator(), false)
-                .map(actor -> modelMapper.map(actor, DTOActor.class))
+                .map(actor -> modelMapper.map(actor, ActorDTO.class))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public DTOActor create(final DTOActor payload) {
+    public ActorDTO create(final ActorDTO payload) {
         if (payload.getActorId() != null) {
             throw new OperationNotAllowedException();
         }
 
         return modelMapper.map(
                 actorRepository.save(
-                        modelMapper.map(payload, Actor.class)), DTOActor.class);
+                        modelMapper.map(payload, Actor.class)), ActorDTO.class);
     }
 
     @Override
-    public DTOActor modify(final Short actorId, final DTOActor payload) {
+    public ActorDTO modify(final Short actorId, final ActorDTO payload) {
         Actor actor = modelMapper.map(payload, Actor.class);
         actor.setActorId(actorId);
 
         actorRepository.save(actor);
 
-        return modelMapper.map(actor, DTOActor.class);
+        return modelMapper.map(actor, ActorDTO.class);
     }
 
     @Override
-    public DTOActor get(final Short actorId) {
+    public ActorDTO get(final Short actorId) {
         return actorRepository.findById(actorId)
-                .map(actor -> modelMapper.map(actor, DTOActor.class))
+                .map(actor -> modelMapper.map(actor, ActorDTO.class))
                 .orElseThrow(() -> new ActorNotFoundException(actorId));
     }
 
@@ -89,9 +89,9 @@ public class ActorBusinessImpl implements ActorBusiness {
     }
 
     @Override
-    public DTOFilm getFilm(final Short actorId, final Short filmId) {
+    public FilmDTO getFilm(final Short actorId, final Short filmId) {
         return filmActorRepository.findById(new FilmActorId(actorId, filmId))
-                .map(r -> modelMapper.map(r.getFilm(), DTOFilm.class))
+                .map(filmActor -> modelMapper.map(filmActor.getFilm(), FilmDTO.class))
                 .orElseThrow(() -> new OperationNotAllowedException("The actor doesn't participate in film"));
     }
 

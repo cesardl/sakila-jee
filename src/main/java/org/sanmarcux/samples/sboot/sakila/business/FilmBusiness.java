@@ -1,6 +1,6 @@
 package org.sanmarcux.samples.sboot.sakila.business;
 
-import org.sanmarcux.samples.sboot.sakila.dto.DTOFilm;
+import org.sanmarcux.samples.sboot.sakila.dto.FilmDTO;
 
 import java.util.List;
 
@@ -11,11 +11,11 @@ import java.util.List;
  */
 public interface FilmBusiness {
 
-    List<DTOFilm> list();
+    List<FilmDTO> list();
 
-    DTOFilm create(DTOFilm payload);
+    FilmDTO create(FilmDTO payload);
 
-    List<DTOFilm> findFilmsByActor(Short actorId);
+    List<FilmDTO> findFilmsByActor(Short actorId);
 
-    DTOFilm get(Short filmId);
+    FilmDTO get(Short filmId);
 }

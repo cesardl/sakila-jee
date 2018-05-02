@@ -1,7 +1,7 @@
 package org.sanmarcux.samples.sboot.sakila.business;
 
-import org.sanmarcux.samples.sboot.sakila.dto.DTOActor;
-import org.sanmarcux.samples.sboot.sakila.dto.DTOFilm;
+import org.sanmarcux.samples.sboot.sakila.dto.ActorDTO;
+import org.sanmarcux.samples.sboot.sakila.dto.FilmDTO;
 
 import java.util.List;
 
@@ -12,19 +12,19 @@ import java.util.List;
  */
 public interface ActorBusiness {
 
-    List<DTOActor> list();
+    List<ActorDTO> list();
 
-    DTOActor create(DTOActor payload);
+    ActorDTO create(ActorDTO payload);
 
-    DTOActor modify(Short actorId, DTOActor payload);
+    ActorDTO modify(Short actorId, ActorDTO payload);
 
-    DTOActor get(Short actorId);
+    ActorDTO get(Short actorId);
 
     void delete(Short actorId);
 
     void createFilmParticipation(Short actorId, Short payload);
 
-    DTOFilm getFilm(Short actorId, Short filmId);
+    FilmDTO getFilm(Short actorId, Short filmId);
 
     void deleteFilm(Short actorId, Short filmId);
 }

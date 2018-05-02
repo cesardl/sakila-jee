@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sanmarcux.samples.sboot.sakila.SakilaApplication;
-import org.sanmarcux.samples.sboot.sakila.dto.DTOFilm;
+import org.sanmarcux.samples.sboot.sakila.dto.FilmDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,17 +72,10 @@ public class ActorRestControllerTest {
 
     @Test
     public void createActorParticipationInFilm() throws Exception {
-//        DTOFilm film = new DTOFilm();
-//        film.setTitle("Dummy film");
-//        film.setDescription("Description of film created by integration test");
-//        film.setRentalRate(BigDecimal.valueOf(1, 12));
-//        film.setReplacementCost(BigDecimal.valueOf(33,12));
-
         this.mockMvc.perform(put("/actors/" + actorId + "/films/3")
                 .contentType(contentType)
-                .content(objectMapper.writeValueAsString(new DTOFilm())))
-                .andExpect(status().isOk())
-                .andReturn();
+                .content(objectMapper.writeValueAsString(new FilmDTO())))
+                .andExpect(status().isOk());
 
         this.mockMvc.perform(delete("/actors/" + actorId + "/films/3"))
                 .andExpect(status().isOk());

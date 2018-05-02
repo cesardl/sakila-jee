@@ -9,18 +9,22 @@ import java.util.Date;
  *
  * @author Cesardl
  */
-public class DTOFilm {
+public class FilmDTO {
 
     private Short filmId;
     private String title;
     private String description;
     private Date releaseYear;
+    private LanguageDTO language;
 
     @NotNull
     private BigDecimal rentalRate;
 
     @NotNull
     private BigDecimal replacementCost;
+
+    private String rating;
+    private String specialFeatures;
 
     public Short getFilmId() {
         return filmId;
@@ -54,6 +58,14 @@ public class DTOFilm {
         this.releaseYear = releaseYear;
     }
 
+    public LanguageDTO getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(LanguageDTO language) {
+        this.language = language;
+    }
+
     public BigDecimal getRentalRate() {
         return rentalRate;
     }
@@ -68,5 +80,21 @@ public class DTOFilm {
 
     public void setReplacementCost(BigDecimal replacementCost) {
         this.replacementCost = replacementCost;
+    }
+
+    public String getRating() {
+        return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
+    }
+
+    public String getSpecialFeatures() {
+        return specialFeatures;
+    }
+
+    public void setSpecialFeatures(String specialFeatures) {
+        this.specialFeatures = specialFeatures;
     }
 }

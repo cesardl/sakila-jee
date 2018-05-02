@@ -1,8 +1,7 @@
 package org.sanmarcux.samples.sboot.sakila.controller;
 
 import org.sanmarcux.samples.sboot.sakila.business.FilmBusiness;
-import org.sanmarcux.samples.sboot.sakila.dto.DTOActor;
-import org.sanmarcux.samples.sboot.sakila.dto.DTOFilm;
+import org.sanmarcux.samples.sboot.sakila.dto.FilmDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +32,16 @@ public class FilmRestController {
     }
 
     @GetMapping
-    public List<DTOFilm> listFilms() {
+    public List<FilmDTO> listFilms() {
         LOG.info("Invoking Rest Service listFilms");
         return filmBusiness.list();
     }
 
     @PostMapping
-    public ResponseEntity<?> createFilm(@Valid @RequestBody final DTOFilm payload) {
+    public ResponseEntity<?> createFilm(@Valid @RequestBody final FilmDTO payload) {
         LOG.info("Invoking Rest Service createFilmParticipation");
 
-        DTOFilm result = filmBusiness.create(payload);
+        FilmDTO result = filmBusiness.create(payload);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{filmId}")
@@ -52,7 +51,7 @@ public class FilmRestController {
     }
 
     @GetMapping("/{filmId}")
-    public DTOFilm getFilm(@PathVariable Short filmId) {
+    public FilmDTO getFilm(@PathVariable Short filmId) {
         LOG.info("Invoking Rest Service getFilm");
         return filmBusiness.get(filmId);
     }

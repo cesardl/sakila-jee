@@ -15,5 +15,4 @@ select * from film where film_id = 100;
 
 select * from film_actor where actor_id = 122;
 
-select filmactor0_.actor_id as actor_id1_9_0_, filmactor0_.film_id as film_id2_9_0_, filmactor0_.last_update as last_upd3_9_0_
-           from sakila.film_actor filmactor0_ where filmactor0_.actor_id=100 and filmactor0_.film_id=100;
+select f.*, l.name from film f inner join film_actor fa on f.film_id = fa.film_id inner join language l on f.language_id = l.language_id where fa.actor_id = 100;
