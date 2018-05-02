@@ -21,7 +21,5 @@ script:
 
 after_script:
   - export JACOCO_SOURCE_PATH=src/main/java
-  - echo $JACOCO_SOURCE_PATH
-  - ./cc-test-reporter format-coverage target/site/jacoco/jacoco.xml --input-type jacoco --debug
-  - ls -lha .
-  - ./cc-test-reporter upload-coverage --debug
+  - ./cc-test-reporter format-coverage target/site/jacoco/jacoco.xml --input-type jacoco
+  - ./cc-test-reporter upload-coverage
