@@ -1,6 +1,8 @@
 INSERT INTO language(language_id, name, last_update) VALUES (1,'English',CURRENT_TIMESTAMP());
 
-INSERT INTO actor(actor_id, first_name, last_name, last_update) VALUES (100,'SPENCER','DEPP',CURRENT_TIMESTAMP());
+INSERT INTO actor(actor_id, first_name, last_name, last_update) VALUES
+(100,'SPENCER','DEPP',CURRENT_TIMESTAMP()),
+(101,'SUSAN','DAVIS','2006-02-15 04:34:33');
 
 INSERT INTO film (film_id,title, description, release_year, language_id, original_language_id, rental_duration, rental_rate, length, replacement_cost, rating, special_features, last_update) VALUES
 (1,'ACADEMY DINOSAUR','A Epic Drama of a Feminist And a Mad Scientist who must Battle a Teacher in The Canadian Rockies',CURRENT_DATE(),1,NULL,6,'0.99',86,'20.99','PG','Deleted Scenes,Behind the Scenes',CURRENT_TIMESTAMP()),

@@ -43,6 +43,7 @@ public class ActorRestController {
      * @return actors
      */
     @GetMapping
+    @ResponseBody
     public ResponseEntity<Page<ActorDTO>> listActors(final Pageable pageable) {
         LOG.info("Invoking Rest Service listActors");
         Page<ActorDTO> actors = actorBusiness.list(pageable);
@@ -79,6 +80,7 @@ public class ActorRestController {
      * @return an actor
      */
     @GetMapping("/{actorId}")
+    @ResponseBody
     public ActorDTO getActor(@PathVariable Short actorId) {
         LOG.info("Invoking Rest Service getActor");
         return actorBusiness.get(actorId);

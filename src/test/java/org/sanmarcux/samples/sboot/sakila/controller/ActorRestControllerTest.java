@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.charset.Charset;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -41,8 +42,22 @@ public class ActorRestControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
+    public void readActors() throws Exception {
+        mockMvc.perform(get("/actors/"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].actorId", is(100)))
+                .andExpect(jsonPath("$.content[0].firstName", is("SPENCER")))
+                .andExpect(jsonPath("$.content[0].lastName", is("DEPP")))
+                .andExpect(jsonPath("$.content[1].actorId", is(101)))
+                .andExpect(jsonPath("$.content[1].firstName", is("SUSAN")))
+                .andExpect(jsonPath("$.content[1].lastName", is("DAVIS")));
+    }
+
+    @Test
     public void actorNotFound() throws Exception {
-        mockMvc.perform(get("/actors/101"))
+        mockMvc.perform(get("/actors/102"))
                 .andExpect(status().isNotFound());
     }
 
@@ -54,6 +69,12 @@ public class ActorRestControllerTest {
 //                .andExpect(jsonPath("$.filmId", is(this.films.get(0).getFilmId())))
 //                .andExpect(jsonPath("$.title", is(this.films.get(0).getTitle())))
 //                .andExpect(jsonPath("$.description", is(this.films.get(0).getDescription())));
+    }
+
+    @Test
+    public void actorDoNotParticipateInFilm() throws Exception {
+        mockMvc.perform(get("/actors/" + actorId + "/films/10"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
