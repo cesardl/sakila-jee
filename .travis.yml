@@ -1,11 +1,11 @@
-env:
-  global:
-    - CC_TEST_REPORTER_ID=053198064ed0ad150942e92e54c8d4cab12a7a665c737fa73d47f8d748616a96
-
 language: java
 
 jdk:
   - oraclejdk8
+
+addons:
+  apt:
+    update: true
 
 cache:
   directories:
