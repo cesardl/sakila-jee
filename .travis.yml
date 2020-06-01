@@ -5,6 +5,11 @@ install: true
 jdk:
   - oraclejdk8
 
+git:
+  # Travis CI uses shallow clone to speed up build times, but a truncated SCM history
+  # may cause issues when SonarCloud computes blame data.
+  depth: false
+
 addons:
   apt:
     update: true
@@ -19,9 +24,11 @@ cache:
     - $HOME/.m2
     - $HOME/.sonar/cache
 
-before_script:
+before_install:
   - mysql -u travis < database-model/sakila-schema.sql
   - mysql -u travis sakila < database-model/data.sql
+
+before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build

@@ -4,6 +4,7 @@ package org.sanmarcux.samples.sakila.dao.model;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.Year;
 import java.util.Date;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class Film implements java.io.Serializable {
     private Language languageByLanguageId;
     private String title;
     private String description;
-    private Date releaseYear;
+    private Year releaseYear;
     private byte rentalDuration;
     private BigDecimal rentalRate;
     private Short length;
@@ -52,7 +53,7 @@ public class Film implements java.io.Serializable {
 
     public Film(Language languageByOriginalLanguageId,
                 Language languageByLanguageId, String title, String description,
-                Date releaseYear, byte rentalDuration, BigDecimal rentalRate,
+                Year releaseYear, byte rentalDuration, BigDecimal rentalRate,
                 Short length, BigDecimal replacementCost, Rating rating,
                 String specialFeatures, Date lastUpdate,
                 List<FilmActor> filmActors, List<FilmCategory> filmCategories,
@@ -124,13 +125,13 @@ public class Film implements java.io.Serializable {
         this.description = description;
     }
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "release_year", length = 0)
-    public Date getReleaseYear() {
+    @Convert(converter = YearConverter.class)
+    public Year getReleaseYear() {
         return this.releaseYear;
     }
 
-    public void setReleaseYear(Date releaseYear) {
+    public void setReleaseYear(Year releaseYear) {
         this.releaseYear = releaseYear;
     }
 
@@ -171,6 +172,7 @@ public class Film implements java.io.Serializable {
     }
 
     @Column(name = "rating", length = 5)
+    @Convert(converter = RatingConverter.class)
     public Rating getRating() {
         return this.rating;
     }

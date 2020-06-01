@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.Year;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -113,6 +114,7 @@ public class FilmRestControllerTest {
         FilmDTO film = new FilmDTO();
         film.setTitle("Dummy film");
         film.setDescription("Description of film created by integration test");
+        film.setReleaseYear(Year.of(1999));
         film.setLanguage(language);
         film.setRentalRate(BigDecimal.valueOf(1, 12));
         film.setReplacementCost(BigDecimal.valueOf(33, 12));

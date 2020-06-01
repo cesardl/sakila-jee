@@ -4,7 +4,12 @@ import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.util.stream.Stream;
 
-@Converter(autoApply = true)
+/**
+ * Created for sakila-jee on 31/05/2020.
+ *
+ * @author Cesardl
+ */
+@Converter
 public class RatingConverter implements AttributeConverter<Rating, String> {
 
     @Override

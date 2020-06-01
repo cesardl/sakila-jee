@@ -5,6 +5,7 @@ import org.sanmarcux.samples.sakila.dao.model.Rating;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.Year;
 import java.util.Date;
 
 /**
@@ -17,7 +18,7 @@ public class FilmDTO {
     private Short filmId;
     private String title;
     private String description;
-    private Date releaseYear;
+    private Year releaseYear;
 
     @Valid
     @NotNull
@@ -56,11 +57,11 @@ public class FilmDTO {
         this.description = description;
     }
 
-    public Date getReleaseYear() {
+    public Year getReleaseYear() {
         return releaseYear;
     }
 
-    public void setReleaseYear(Date releaseYear) {
+    public void setReleaseYear(Year releaseYear) {
         this.releaseYear = releaseYear;
     }
 
