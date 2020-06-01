@@ -2,14 +2,14 @@ package org.sanmarcux.samples.sakila.business.impl;
 
 import org.modelmapper.ModelMapper;
 import org.sanmarcux.samples.sakila.business.FilmBusiness;
-import org.sanmarcux.samples.sakila.exceptions.FilmNotFoundException;
-import org.sanmarcux.samples.sakila.exceptions.LanguageNotFoundException;
-import org.sanmarcux.samples.sakila.exceptions.OperationNotAllowedException;
 import org.sanmarcux.samples.sakila.dao.FilmRepository;
 import org.sanmarcux.samples.sakila.dao.LanguageRepository;
 import org.sanmarcux.samples.sakila.dao.model.Film;
 import org.sanmarcux.samples.sakila.dao.model.Language;
 import org.sanmarcux.samples.sakila.dto.FilmDTO;
+import org.sanmarcux.samples.sakila.exceptions.FilmNotFoundException;
+import org.sanmarcux.samples.sakila.exceptions.LanguageNotFoundException;
+import org.sanmarcux.samples.sakila.exceptions.OperationNotAllowedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,13 +27,14 @@ import java.util.stream.Collectors;
 @Service
 public class FilmBusinessImpl implements FilmBusiness {
 
-    private FilmRepository filmRepository;
-    private LanguageRepository languageRepository;
+    private final FilmRepository filmRepository;
+    private final LanguageRepository languageRepository;
 
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    private FilmBusinessImpl(FilmRepository filmRepository, LanguageRepository languageRepository,
+    private FilmBusinessImpl(FilmRepository filmRepository,
+                             LanguageRepository languageRepository,
                              ModelMapper modelMapper) {
         this.filmRepository = filmRepository;
         this.languageRepository = languageRepository;

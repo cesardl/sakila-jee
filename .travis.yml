@@ -1,15 +1,32 @@
+dist: trusty
 language: java
+install: true
 
 jdk:
   - oraclejdk8
+
+git:
+  # Travis CI uses shallow clone to speed up build times, but a truncated SCM history
+  # may cause issues when SonarCloud computes blame data.
+  depth: false
 
 addons:
   apt:
     update: true
 
+  sonarcloud:
+    organization: "cesardl-github" # the key of the org you chose at step #3
+    token:
+      secure: $SONAR_TOKEN # encrypted value of your token
+
 cache:
   directories:
-  - $HOME/.m2
+    - $HOME/.m2
+    - $HOME/.sonar/cache
+
+before_install:
+  - mysql -u travis < database-model/sakila-schema.sql
+  - mysql -u travis sakila < database-model/data.sql
 
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -18,6 +35,7 @@ before_script:
 
 script:
   - mvn clean verify
+  - if [ "$TRAVIS_BRANCH" = "master" ]; then sonar-scanner; fi
 
 after_script:
   - export JACOCO_SOURCE_PATH=src/main/java

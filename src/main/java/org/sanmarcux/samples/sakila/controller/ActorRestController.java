@@ -28,8 +28,8 @@ public class ActorRestController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActorRestController.class);
 
-    private ActorBusiness actorBusiness;
-    private FilmBusiness filmBusiness;
+    private final ActorBusiness actorBusiness;
+    private final FilmBusiness filmBusiness;
 
     @Autowired
     public ActorRestController(ActorBusiness actorBusiness, FilmBusiness filmBusiness) {
