@@ -1,16 +1,16 @@
 package org.sanmarcux.samples.sakila.business.impl;
 
 import org.modelmapper.ModelMapper;
-import org.sanmarcux.samples.sakila.dto.ActorDTO;
-import org.sanmarcux.samples.sakila.exceptions.ActorNotFoundException;
-import org.sanmarcux.samples.sakila.exceptions.OperationNotAllowedException;
 import org.sanmarcux.samples.sakila.business.ActorBusiness;
 import org.sanmarcux.samples.sakila.dao.ActorRepository;
 import org.sanmarcux.samples.sakila.dao.FilmActorRepository;
 import org.sanmarcux.samples.sakila.dao.model.Actor;
 import org.sanmarcux.samples.sakila.dao.model.FilmActor;
 import org.sanmarcux.samples.sakila.dao.model.FilmActorId;
+import org.sanmarcux.samples.sakila.dto.ActorDTO;
 import org.sanmarcux.samples.sakila.dto.FilmDTO;
+import org.sanmarcux.samples.sakila.exceptions.ActorNotFoundException;
+import org.sanmarcux.samples.sakila.exceptions.OperationNotAllowedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,13 +27,14 @@ import java.util.stream.Collectors;
 @Service
 public class ActorBusinessImpl implements ActorBusiness {
 
-    private ActorRepository actorRepository;
-    private FilmActorRepository filmActorRepository;
+    private final ActorRepository actorRepository;
+    private final FilmActorRepository filmActorRepository;
 
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    private ActorBusinessImpl(ActorRepository actorRepository, FilmActorRepository filmActorRepository,
+    private ActorBusinessImpl(ActorRepository actorRepository,
+                              FilmActorRepository filmActorRepository,
                               ModelMapper modelMapper) {
         this.actorRepository = actorRepository;
         this.filmActorRepository = filmActorRepository;

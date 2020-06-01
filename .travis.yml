@@ -1,4 +1,6 @@
+dist: trusty
 language: java
+install: true
 
 jdk:
   - oraclejdk8
@@ -7,17 +9,26 @@ addons:
   apt:
     update: true
 
+  sonarcloud:
+    organization: "cesardl-github" # the key of the org you chose at step #3
+    token:
+      secure: $SONAR_TOKEN # encrypted value of your token
+
 cache:
   directories:
-  - $HOME/.m2
+    - $HOME/.m2
+    - $HOME/.sonar/cache
 
 before_script:
+  - mysql -u travis < database-model/sakila-schema.sql
+  - mysql -u travis sakila < database-model/data.sql
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 
 script:
   - mvn clean verify
+  - if [ "$TRAVIS_BRANCH" = "master" ]; then sonar-scanner; fi
 
 after_script:
   - export JACOCO_SOURCE_PATH=src/main/java
