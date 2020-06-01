@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sanmarcux.samples.sakila.SakilaApplication;
+import org.sanmarcux.samples.sakila.dao.model.Rating;
 import org.sanmarcux.samples.sakila.dto.FilmDTO;
 import org.sanmarcux.samples.sakila.dto.LanguageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class FilmRestControllerTest {
 
-    private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
+    private final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
             StandardCharsets.UTF_8);
 
@@ -79,7 +80,8 @@ public class FilmRestControllerTest {
         this.mockMvc.perform(post("/films/")
                 .contentType(contentType)
                 .content(objectMapper.writeValueAsString(buildFilm())))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"));
     }
 
     @Test
@@ -111,9 +113,10 @@ public class FilmRestControllerTest {
         FilmDTO film = new FilmDTO();
         film.setTitle("Dummy film");
         film.setDescription("Description of film created by integration test");
+        film.setLanguage(language);
         film.setRentalRate(BigDecimal.valueOf(1, 12));
         film.setReplacementCost(BigDecimal.valueOf(33, 12));
-        film.setLanguage(language);
+        film.setRating(Rating.GENERAL_AUDIENCES);
         return film;
     }
 }

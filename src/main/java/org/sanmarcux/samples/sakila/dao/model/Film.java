@@ -29,7 +29,7 @@ public class Film implements java.io.Serializable {
     private BigDecimal rentalRate;
     private Short length;
     private BigDecimal replacementCost;
-    private String rating;
+    private Rating rating;
     private String specialFeatures;
     private Date lastUpdate;
     private List<FilmActor> filmActors;
@@ -53,7 +53,7 @@ public class Film implements java.io.Serializable {
     public Film(Language languageByOriginalLanguageId,
                 Language languageByLanguageId, String title, String description,
                 Date releaseYear, byte rentalDuration, BigDecimal rentalRate,
-                Short length, BigDecimal replacementCost, String rating,
+                Short length, BigDecimal replacementCost, Rating rating,
                 String specialFeatures, Date lastUpdate,
                 List<FilmActor> filmActors, List<FilmCategory> filmCategories,
                 List<Inventory> inventories) {
@@ -171,11 +171,11 @@ public class Film implements java.io.Serializable {
     }
 
     @Column(name = "rating", length = 5)
-    public String getRating() {
+    public Rating getRating() {
         return this.rating;
     }
 
-    public void setRating(String rating) {
+    public void setRating(Rating rating) {
         this.rating = rating;
     }
 

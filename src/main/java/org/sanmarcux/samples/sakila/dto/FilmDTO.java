@@ -1,5 +1,8 @@
 package org.sanmarcux.samples.sakila.dto;
 
+import org.sanmarcux.samples.sakila.dao.model.Rating;
+
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -15,6 +18,9 @@ public class FilmDTO {
     private String title;
     private String description;
     private Date releaseYear;
+
+    @Valid
+    @NotNull
     private LanguageDTO language;
 
     @NotNull
@@ -23,7 +29,7 @@ public class FilmDTO {
     @NotNull
     private BigDecimal replacementCost;
 
-    private String rating;
+    private Rating rating;
     private String specialFeatures;
 
     public Short getFilmId() {
@@ -82,11 +88,11 @@ public class FilmDTO {
         this.replacementCost = replacementCost;
     }
 
-    public String getRating() {
+    public Rating getRating() {
         return rating;
     }
 
-    public void setRating(String rating) {
+    public void setRating(Rating rating) {
         this.rating = rating;
     }
 
