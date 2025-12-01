@@ -1,18 +1,15 @@
 package org.sanmarcux.samples.sakila.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.sanmarcux.samples.sakila.SakilaApplication;
 import org.sanmarcux.samples.sakila.dto.FilmDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -25,20 +22,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Cesardl
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = SakilaApplication.class)
 @AutoConfigureMockMvc
 public class ActorRestControllerTest {
 
-    private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
+    private final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
             StandardCharsets.UTF_8);
-
+    private final String actorId = "100";
     @Autowired
     private MockMvc mockMvc;
-
-    private String actorId = "100";
-
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -95,8 +88,8 @@ public class ActorRestControllerTest {
     @Test
     public void createActorParticipationInFilm() throws Exception {
         this.mockMvc.perform(put("/actors/" + actorId + "/films/3")
-                .contentType(contentType)
-                .content(objectMapper.writeValueAsString(new FilmDTO())))
+                        .contentType(contentType)
+                        .content(objectMapper.writeValueAsString(new FilmDTO())))
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(delete("/actors/" + actorId + "/films/3"))
