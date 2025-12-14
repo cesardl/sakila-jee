@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Cesardl
  */
 @Transactional
-public interface ActorRepository extends JpaRepository<Actor, Short> {
+public interface ActorRepository extends JpaRepository<Actor, Integer> {
 
     /**
      * This method will find an DTOActor instance in the database by its last name.

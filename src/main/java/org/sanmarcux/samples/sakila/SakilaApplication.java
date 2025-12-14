@@ -1,6 +1,7 @@
 package org.sanmarcux.samples.sakila;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,7 +23,11 @@ public class SakilaApplication {
 
     @Bean
     public ModelMapper modelMapper() {
-        return new ModelMapper();
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration()
+                .setSkipNullEnabled(true)
+                .setMatchingStrategy(MatchingStrategies.STRICT);
+        return modelMapper;
     }
 
     // CORS

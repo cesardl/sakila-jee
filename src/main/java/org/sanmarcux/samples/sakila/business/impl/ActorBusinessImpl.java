@@ -1,22 +1,23 @@
 package org.sanmarcux.samples.sakila.business.impl;
 
 import org.modelmapper.ModelMapper;
-import org.sanmarcux.samples.sakila.dto.ActorDTO;
-import org.sanmarcux.samples.sakila.exceptions.ActorNotFoundException;
-import org.sanmarcux.samples.sakila.exceptions.OperationNotAllowedException;
 import org.sanmarcux.samples.sakila.business.ActorBusiness;
 import org.sanmarcux.samples.sakila.dao.ActorRepository;
 import org.sanmarcux.samples.sakila.dao.FilmActorRepository;
 import org.sanmarcux.samples.sakila.dao.model.Actor;
 import org.sanmarcux.samples.sakila.dao.model.FilmActor;
 import org.sanmarcux.samples.sakila.dao.model.FilmActorId;
+import org.sanmarcux.samples.sakila.dto.ActorDTO;
 import org.sanmarcux.samples.sakila.dto.FilmDTO;
+import org.sanmarcux.samples.sakila.exceptions.ActorNotFoundException;
+import org.sanmarcux.samples.sakila.exceptions.OperationNotAllowedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.stream.Collectors;
 
 /**
@@ -27,13 +28,14 @@ import java.util.stream.Collectors;
 @Service
 public class ActorBusinessImpl implements ActorBusiness {
 
-    private ActorRepository actorRepository;
-    private FilmActorRepository filmActorRepository;
+    private final ActorRepository actorRepository;
+    private final FilmActorRepository filmActorRepository;
 
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    private ActorBusinessImpl(ActorRepository actorRepository, FilmActorRepository filmActorRepository,
+    private ActorBusinessImpl(ActorRepository actorRepository,
+                              FilmActorRepository filmActorRepository,
                               ModelMapper modelMapper) {
         this.actorRepository = actorRepository;
         this.filmActorRepository = filmActorRepository;
@@ -63,7 +65,7 @@ public class ActorBusinessImpl implements ActorBusiness {
     }
 
     @Override
-    public ActorDTO modify(final Short actorId, final ActorDTO payload) {
+    public ActorDTO modify(final Integer actorId, final ActorDTO payload) {
         Actor actor = modelMapper.map(payload, Actor.class);
         actor.setActorId(actorId);
 
@@ -73,33 +75,34 @@ public class ActorBusinessImpl implements ActorBusiness {
     }
 
     @Override
-    public ActorDTO get(final Short actorId) {
+    public ActorDTO get(final Integer actorId) {
         return actorRepository.findById(actorId)
                 .map(actor -> modelMapper.map(actor, ActorDTO.class))
                 .orElseThrow(() -> new ActorNotFoundException(actorId));
     }
 
     @Override
-    public void delete(final Short actorId) {
+    public void delete(final Integer actorId) {
         actorRepository.deleteById(actorId);
     }
 
     @Override
-    public void createFilmParticipation(final Short actorId, final Short filmId) {
+    public void createFilmParticipation(final Integer actorId, final Integer filmId) {
         FilmActor filmActor = new FilmActor();
         filmActor.setId(new FilmActorId(actorId, filmId));
+        filmActor.setLastUpdate(new Date());
         filmActorRepository.save(filmActor);
     }
 
     @Override
-    public FilmDTO getFilm(final Short actorId, final Short filmId) {
+    public FilmDTO getFilm(final Integer actorId, final Integer filmId) {
         return filmActorRepository.findById(new FilmActorId(actorId, filmId))
                 .map(filmActor -> modelMapper.map(filmActor.getFilm(), FilmDTO.class))
                 .orElseThrow(() -> new OperationNotAllowedException("The actor doesn't participate in film"));
     }
 
     @Override
-    public void deleteFilm(final Short actorId, final Short filmId) {
+    public void deleteFilm(final Integer actorId, final Integer filmId) {
         filmActorRepository.deleteById(new FilmActorId(actorId, filmId));
     }
 }

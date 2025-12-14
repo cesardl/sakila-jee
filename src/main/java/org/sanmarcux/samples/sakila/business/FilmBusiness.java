@@ -17,7 +17,7 @@ public interface FilmBusiness {
 
     FilmDTO create(FilmDTO payload);
 
-    List<FilmDTO> findFilmsByActor(Short actorId);
+    List<FilmDTO> findFilmsByActor(Integer actorId);
 
-    FilmDTO get(Short filmId);
+    FilmDTO get(Integer filmId);
 }

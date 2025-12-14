@@ -1,20 +1,19 @@
 package org.sanmarcux.samples.sakila.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.sanmarcux.samples.sakila.SakilaApplication;
+import org.sanmarcux.samples.sakila.dao.model.Rating;
 import org.sanmarcux.samples.sakila.dto.FilmDTO;
 import org.sanmarcux.samples.sakila.dto.LanguageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
+import java.time.Year;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -27,26 +26,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Cesardl
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = SakilaApplication.class)
 @AutoConfigureMockMvc
 public class FilmRestControllerTest {
-
-    private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-            MediaType.APPLICATION_JSON.getSubtype(),
-            Charset.forName("utf8"));
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper mapper;
 
     @Test
     public void readFilms() throws Exception {
-        mockMvc.perform(get("/films/"))
+        mockMvc.perform(get("/films?size=3"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(3)))
                 .andExpect(jsonPath("$.content[0].filmId", is(1)))
                 .andExpect(jsonPath("$.content[0].title", is("ACADEMY DINOSAUR")))
@@ -61,25 +55,25 @@ public class FilmRestControllerTest {
 
     @Test
     public void filmNotFound() throws Exception {
-        mockMvc.perform(get("/films/101"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/films/2000")).andExpect(status().isNotFound());
     }
 
     @Test
     public void readFilmData() throws Exception {
         mockMvc.perform(get("/films/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.filmId", is(1)))
                 .andExpect(jsonPath("$.title", is("ACADEMY DINOSAUR")));
     }
 
     @Test
     public void createFilm() throws Exception {
-        this.mockMvc.perform(post("/films/")
-                .contentType(contentType)
-                .content(objectMapper.writeValueAsString(buildFilm())))
-                .andExpect(status().isCreated());
+        this.mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(buildFilm())))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"));
     }
 
     @Test
@@ -88,20 +82,18 @@ public class FilmRestControllerTest {
         film.getLanguage().setId(100);
 
         this.mockMvc.perform(post("/films/")
-                .contentType(contentType)
-                .content(objectMapper.writeValueAsString(film)))
-                .andExpect(status().isNotFound());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(film))).andExpect(status().isNotFound());
     }
 
     @Test
     public void createFilmWithSendingFilmId() throws Exception {
         FilmDTO film = buildFilm();
-        film.setFilmId((short) 1);
+        film.setFilmId(1);
 
-        this.mockMvc.perform(post("/films/")
-                .contentType(contentType)
-                .content(objectMapper.writeValueAsString(film)))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post("/films")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(film))).andExpect(status().isBadRequest());
     }
 
     private FilmDTO buildFilm() {
@@ -111,9 +103,11 @@ public class FilmRestControllerTest {
         FilmDTO film = new FilmDTO();
         film.setTitle("Dummy film");
         film.setDescription("Description of film created by integration test");
+        film.setReleaseYear(Year.of(1999));
+        film.setLanguage(language);
         film.setRentalRate(BigDecimal.valueOf(1, 12));
         film.setReplacementCost(BigDecimal.valueOf(33, 12));
-        film.setLanguage(language);
+        film.setRating(Rating.GENERAL_AUDIENCES);
         return film;
     }
 }

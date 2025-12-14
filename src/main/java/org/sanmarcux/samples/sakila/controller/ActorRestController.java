@@ -29,8 +29,8 @@ public class ActorRestController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActorRestController.class);
 
-    private ActorBusiness actorBusiness;
-    private FilmBusiness filmBusiness;
+    private final ActorBusiness actorBusiness;
+    private final FilmBusiness filmBusiness;
 
     @Autowired
     public ActorRestController(ActorBusiness actorBusiness, FilmBusiness filmBusiness) {
@@ -85,7 +85,7 @@ public class ActorRestController {
      */
     @GetMapping("/{actorId}")
     @ResponseBody
-    public ActorDTO getActor(@PathVariable Short actorId) {
+    public ActorDTO getActor(@PathVariable Integer actorId) {
         LOG.info("Invoking Rest Service getActor");
         return actorBusiness.get(actorId);
     }
@@ -98,7 +98,7 @@ public class ActorRestController {
      * @return a modified actor
      */
     @PatchMapping("/{actorId}")
-    public ActorDTO modifyActor(@PathVariable final Short actorId, @RequestBody final ActorDTO payload) {
+    public ActorDTO modifyActor(@PathVariable final Integer actorId, @RequestBody final ActorDTO payload) {
         LOG.info("Invoking Rest Service modifyActor");
         return actorBusiness.modify(actorId, payload);
     }
@@ -109,7 +109,7 @@ public class ActorRestController {
      * @param actorId actor resource id
      */
     @DeleteMapping("/{actorId}")
-    public ResponseEntity<?> deleteActor(@PathVariable final Short actorId) {
+    public ResponseEntity<?> deleteActor(@PathVariable final Integer actorId) {
         LOG.info("Invoking Rest Service deleteActor");
         actorBusiness.delete(actorId);
 
@@ -117,7 +117,7 @@ public class ActorRestController {
     }
 
     @GetMapping("/{actorId}/films")
-    public ResponseEntity<List<FilmDTO>> listActorFilms(@PathVariable final Short actorId) {
+    public ResponseEntity<List<FilmDTO>> listActorFilms(@PathVariable final Integer actorId) {
         LOG.info("Invoking Rest Service listActorFilms");
         List<FilmDTO> films = filmBusiness.findFilmsByActor(actorId);
         if (films.isEmpty()) {
@@ -127,14 +127,14 @@ public class ActorRestController {
     }
 
     @GetMapping("/{actorId}/films/{filmId}")
-    public FilmDTO getActorFilm(@PathVariable final Short actorId, @PathVariable final Short filmId) {
+    public FilmDTO getActorFilm(@PathVariable final Integer actorId, @PathVariable final Integer filmId) {
         LOG.info("Invoking Rest Service getActorFilm");
 
         return actorBusiness.getFilm(actorId, filmId);
     }
 
     @PutMapping("/{actorId}/films/{filmId}")
-    public ResponseEntity<?> modifyActorFilm(@PathVariable final Short actorId, @PathVariable final Short filmId, @RequestBody final FilmDTO payload) {
+    public ResponseEntity<?> modifyActorFilm(@PathVariable final Integer actorId, @PathVariable final Integer filmId, @RequestBody final FilmDTO payload) {
         LOG.info("Invoking Rest Service modifyActorFilm");
 
         actorBusiness.createFilmParticipation(actorId, filmId);
@@ -143,7 +143,7 @@ public class ActorRestController {
     }
 
     @DeleteMapping("/{actorId}/films/{filmId}")
-    public ResponseEntity<?> deleteActorFilm(@PathVariable final Short actorId, @PathVariable final Short filmId) {
+    public ResponseEntity<?> deleteActorFilm(@PathVariable final Integer actorId, @PathVariable final Integer filmId) {
         LOG.info("Invoking Rest Service deleteActorFilm");
         actorBusiness.deleteFilm(actorId, filmId);
 
