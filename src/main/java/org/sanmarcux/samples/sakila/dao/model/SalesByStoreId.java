@@ -2,8 +2,9 @@ package org.sanmarcux.samples.sakila.dao.model;
 
 // Generated 20/10/2012 11:23:03 AM by Hibernate Tools 3.4.0.CR1
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
 import java.math.BigDecimal;
 
 /**
@@ -58,9 +59,8 @@ public class SalesByStoreId implements java.io.Serializable {
             return true;
         if ((other == null))
             return false;
-        if (!(other instanceof SalesByStoreId))
+        if (!(other instanceof SalesByStoreId castOther))
             return false;
-        SalesByStoreId castOther = (SalesByStoreId) other;
 
         return ((this.getStore() == castOther.getStore()) || (this.getStore() != null
                 && castOther.getStore() != null && this.getStore().equals(

@@ -2,14 +2,6 @@ dist: trusty
 language: java
 install: true
 
-jdk:
-  - oraclejdk8
-
-git:
-  # Travis CI uses shallow clone to speed up build times, but a truncated SCM history
-  # may cause issues when SonarCloud computes blame data.
-  depth: false
-
 addons:
   apt:
     update: true
@@ -19,10 +11,13 @@ addons:
     token:
       secure: $SONAR_TOKEN # encrypted value of your token
 
-cache:
-  directories:
-    - $HOME/.m2
-    - $HOME/.sonar/cache
+jdk:
+  - oraclejdk8
+
+git:
+  # Travis CI uses shallow clone to speed up build times, but a truncated SCM history
+  # may cause issues when SonarCloud computes blame data.
+  depth: false
 
 before_install:
   - mysql -u travis < database-model/sakila-schema.sql
@@ -41,3 +36,8 @@ after_script:
   - export JACOCO_SOURCE_PATH=src/main/java
   - ./cc-test-reporter format-coverage target/site/jacoco/jacoco.xml --input-type jacoco
   - ./cc-test-reporter upload-coverage
+
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/.sonar/cache

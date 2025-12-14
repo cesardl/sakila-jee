@@ -13,7 +13,7 @@ public enum Rating {
     RESTRICTED("R"),
     ADULTS_ONLY("NC-17");
 
-    String code;
+    final String code;
 
     Rating(String code) {
         this.code = code;

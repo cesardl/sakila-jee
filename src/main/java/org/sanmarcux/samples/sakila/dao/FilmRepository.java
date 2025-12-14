@@ -14,8 +14,8 @@ import java.util.List;
  * @author Cesardl
  */
 @Transactional
-public interface FilmRepository extends JpaRepository<Film, Short> {
+public interface FilmRepository extends JpaRepository<Film, Integer> {
 
     @Query(value = "select f.* from film f inner join film_actor fa on f.film_id = fa.film_id where fa.actor_id = :actorId", nativeQuery = true)
-    List<Film> findAllByActor(@Param("actorId") Short actorId);
+    List<Film> findAllByActor(@Param("actorId") Integer actorId);
 }

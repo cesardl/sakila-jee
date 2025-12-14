@@ -2,7 +2,8 @@ package org.sanmarcux.samples.sakila.dao.model;
 
 // Generated 20/10/2012 11:23:03 AM by Hibernate Tools 3.4.0.CR1
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 import java.util.Date;
 
 /**
@@ -61,7 +62,6 @@ public class FilmCategory implements java.io.Serializable {
         this.category = category;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update", nullable = false, length = 19)
     public Date getLastUpdate() {
         return this.lastUpdate;

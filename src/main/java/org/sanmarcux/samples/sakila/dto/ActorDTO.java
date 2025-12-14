@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
  */
 public class ActorDTO {
 
-    private Short actorId;
+    private Integer actorId;
 
     @NotNull
     private String firstName;
@@ -17,11 +17,11 @@ public class ActorDTO {
     @NotNull
     private String lastName;
 
-    public Short getActorId() {
+    public Integer getActorId() {
         return actorId;
     }
 
-    public void setActorId(Short actorId) {
+    public void setActorId(Integer actorId) {
         this.actorId = actorId;
     }
 

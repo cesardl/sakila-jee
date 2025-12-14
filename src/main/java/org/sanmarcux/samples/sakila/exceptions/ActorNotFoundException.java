@@ -13,7 +13,7 @@ public class ActorNotFoundException extends RuntimeException {
 
     private static final long serialVersionUID = 8732907115274367029L;
 
-    public ActorNotFoundException(final Short actorId) {
+    public ActorNotFoundException(final Integer actorId) {
         super("Could not find actor with id '" + actorId + "'.");
     }
 }
