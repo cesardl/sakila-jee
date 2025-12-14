@@ -1,6 +1,6 @@
 package org.sanmarcux.samples.sakila.dto;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Created on 01/05/2018.

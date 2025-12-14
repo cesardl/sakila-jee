@@ -1,5 +1,6 @@
 package org.sanmarcux.samples.sakila.controller;
 
+import jakarta.validation.Valid;
 import org.sanmarcux.samples.sakila.business.FilmBusiness;
 import org.sanmarcux.samples.sakila.dto.FilmDTO;
 import org.slf4j.Logger;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.validation.Valid;
 import java.net.URI;
 
 /**
@@ -49,9 +49,7 @@ public class FilmRestController {
 
         FilmDTO result = filmBusiness.create(payload);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{filmId}")
-                .buildAndExpand(result.getFilmId()).toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{filmId}").buildAndExpand(result.getFilmId()).toUri();
 
         return ResponseEntity.created(location).build();
     }

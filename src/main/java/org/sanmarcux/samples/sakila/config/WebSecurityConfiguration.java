@@ -17,7 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Configuration
 public class WebSecurityConfiguration {
 
-    private StaffRepository staffRepository;
+    private final StaffRepository staffRepository;
 
     @Autowired
     public WebSecurityConfiguration(StaffRepository staffRepository) {

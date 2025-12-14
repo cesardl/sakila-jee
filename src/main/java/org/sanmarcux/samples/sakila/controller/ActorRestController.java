@@ -1,5 +1,6 @@
 package org.sanmarcux.samples.sakila.controller;
 
+import jakarta.validation.Valid;
 import org.sanmarcux.samples.sakila.business.ActorBusiness;
 import org.sanmarcux.samples.sakila.business.FilmBusiness;
 import org.sanmarcux.samples.sakila.dto.ActorDTO;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
 import java.util.List;
