@@ -1,5 +1,8 @@
 package org.sanmarcux.samples.sakila.dto;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 /**
  * Created on 14/12/2025.
  *
@@ -7,17 +10,36 @@ package org.sanmarcux.samples.sakila.dto;
  */
 public class CustomerDTO {
 
-    private Short customerId;
+    private Integer customerId;
+
+    @Valid
+    @NotNull
+    private StoreDTO store;
+
     private String firstName;
+
     private String lastName;
+
     private String email;
 
-    public Short getCustomerId() {
+    @Valid
+    @NotNull
+    private AddressDTO address;
+
+    public Integer getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(Short customerId) {
+    public void setCustomerId(Integer customerId) {
         this.customerId = customerId;
+    }
+
+    public StoreDTO getStore() {
+        return store;
+    }
+
+    public void setStore(StoreDTO store) {
+        this.store = store;
     }
 
     public String getFirstName() {
@@ -42,5 +64,13 @@ public class CustomerDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public AddressDTO getAddress() {
+        return address;
+    }
+
+    public void setAddress(AddressDTO address) {
+        this.address = address;
     }
 }

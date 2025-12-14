@@ -19,7 +19,7 @@ public class Customer implements java.io.Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-    private Short customerId;
+    private Integer customerId;
     private Address address;
     private Store store;
     private String firstName;
@@ -63,11 +63,11 @@ public class Customer implements java.io.Serializable {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "customer_id", unique = true, nullable = false)
-    public Short getCustomerId() {
+    public Integer getCustomerId() {
         return this.customerId;
     }
 
-    public void setCustomerId(Short customerId) {
+    public void setCustomerId(Integer customerId) {
         this.customerId = customerId;
     }
 

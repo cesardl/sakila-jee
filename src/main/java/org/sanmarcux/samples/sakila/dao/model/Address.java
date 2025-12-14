@@ -4,6 +4,7 @@ package org.sanmarcux.samples.sakila.dao.model;
 
 import jakarta.persistence.*;
 
+import java.io.Serial;
 import java.util.Date;
 import java.util.List;
 
@@ -16,8 +17,9 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Table(name = "address", catalog = "sakila")
 public class Address implements java.io.Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-    private Short addressId;
+    private Integer addressId;
     private City city;
     private String address;
     private String address2;
@@ -59,11 +61,11 @@ public class Address implements java.io.Serializable {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "address_id", unique = true, nullable = false)
-    public Short getAddressId() {
+    public Integer getAddressId() {
         return this.addressId;
     }
 
-    public void setAddressId(Short addressId) {
+    public void setAddressId(Integer addressId) {
         this.addressId = addressId;
     }
 

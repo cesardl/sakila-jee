@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.stream.Collectors;
 
 /**
@@ -64,7 +65,7 @@ public class ActorBusinessImpl implements ActorBusiness {
     }
 
     @Override
-    public ActorDTO modify(final Short actorId, final ActorDTO payload) {
+    public ActorDTO modify(final Integer actorId, final ActorDTO payload) {
         Actor actor = modelMapper.map(payload, Actor.class);
         actor.setActorId(actorId);
 
@@ -74,33 +75,34 @@ public class ActorBusinessImpl implements ActorBusiness {
     }
 
     @Override
-    public ActorDTO get(final Short actorId) {
+    public ActorDTO get(final Integer actorId) {
         return actorRepository.findById(actorId)
                 .map(actor -> modelMapper.map(actor, ActorDTO.class))
                 .orElseThrow(() -> new ActorNotFoundException(actorId));
     }
 
     @Override
-    public void delete(final Short actorId) {
+    public void delete(final Integer actorId) {
         actorRepository.deleteById(actorId);
     }
 
     @Override
-    public void createFilmParticipation(final Short actorId, final Short filmId) {
+    public void createFilmParticipation(final Integer actorId, final Integer filmId) {
         FilmActor filmActor = new FilmActor();
         filmActor.setId(new FilmActorId(actorId, filmId));
+        filmActor.setLastUpdate(new Date());
         filmActorRepository.save(filmActor);
     }
 
     @Override
-    public FilmDTO getFilm(final Short actorId, final Short filmId) {
+    public FilmDTO getFilm(final Integer actorId, final Integer filmId) {
         return filmActorRepository.findById(new FilmActorId(actorId, filmId))
                 .map(filmActor -> modelMapper.map(filmActor.getFilm(), FilmDTO.class))
                 .orElseThrow(() -> new OperationNotAllowedException("The actor doesn't participate in film"));
     }
 
     @Override
-    public void deleteFilm(final Short actorId, final Short filmId) {
+    public void deleteFilm(final Integer actorId, final Integer filmId) {
         filmActorRepository.deleteById(new FilmActorId(actorId, filmId));
     }
 }

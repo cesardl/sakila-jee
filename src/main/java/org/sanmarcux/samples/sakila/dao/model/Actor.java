@@ -23,7 +23,7 @@ public class Actor implements java.io.Serializable {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "actor_id", unique = true, nullable = false)
-    private Short actorId;
+    private Integer actorId;
 
     @Column(name = "first_name", nullable = false, length = 45)
     private String firstName;
@@ -40,7 +40,7 @@ public class Actor implements java.io.Serializable {
     public Actor() {
     }
 
-    public Actor(Short actorId) {
+    public Actor(Integer actorId) {
         this.actorId = actorId;
     }
 
@@ -58,11 +58,11 @@ public class Actor implements java.io.Serializable {
         this.filmActors = filmActors;
     }
 
-    public Short getActorId() {
+    public Integer getActorId() {
         return this.actorId;
     }
 
-    public void setActorId(Short actorId) {
+    public void setActorId(Integer actorId) {
         this.actorId = actorId;
     }
 

@@ -17,7 +17,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 public class Language implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
-    private Byte languageId;
+    private Integer languageId;
     private String name;
     private Date lastUpdate;
     private List<Film> filmsForOriginalLanguageId;
@@ -42,11 +42,11 @@ public class Language implements java.io.Serializable {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "language_id", unique = true, nullable = false)
-    public Byte getLanguageId() {
+    public Integer getLanguageId() {
         return this.languageId;
     }
 
-    public void setLanguageId(Byte languageId) {
+    public void setLanguageId(Integer languageId) {
         this.languageId = languageId;
     }
 

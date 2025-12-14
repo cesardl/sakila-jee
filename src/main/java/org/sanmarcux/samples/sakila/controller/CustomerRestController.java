@@ -2,8 +2,12 @@ package org.sanmarcux.samples.sakila.controller;
 
 import org.sanmarcux.samples.sakila.business.CustomerBusiness;
 import org.sanmarcux.samples.sakila.dto.CustomerDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -12,7 +16,10 @@ import org.springframework.web.bind.annotation.*;
  * @author Cesardl
  */
 @RestController
+@RequestMapping("/customers")
 public class CustomerRestController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CustomerRestController.class);
 
     private final CustomerBusiness business;
 
@@ -22,30 +29,46 @@ public class CustomerRestController {
 
     // Aggregate root
     // tag::get-aggregate-root[]
-    @GetMapping("/customers")
+    @GetMapping
     public CollectionModel<EntityModel<CustomerDTO>> all() {
+        LOG.info("Invoking Rest Service listCustomers");
         return business.findAll();
     }
     // end::get-aggregate-root[]
 
-    @PostMapping("/customers")
-    public CustomerDTO newCustomer(@RequestBody CustomerDTO newCustomer) {
-        return business.save(newCustomer);
+    @PostMapping()
+    public ResponseEntity<?> newCustomer(@RequestBody CustomerDTO newCustomer) {
+        LOG.info("Invoking Rest Service createCustomer");
+
+        EntityModel<CustomerDTO> entityModel = business.save(newCustomer);
+
+        return ResponseEntity
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+                .body(entityModel);
     }
 
     // Single item
-    @GetMapping("/customers/{id}")
-    public EntityModel<CustomerDTO> one(@PathVariable Short id) {
+    @GetMapping("/{id}")
+    public EntityModel<CustomerDTO> one(@PathVariable Integer id) {
+        LOG.info("Invoking Rest Service getCustomer");
         return business.get(id);
     }
 
-    @PutMapping("/customers/{id}")
-    public CustomerDTO replaceCustomer(@RequestBody CustomerDTO newCustomer, @PathVariable Short id) {
-        return business.modify(id, newCustomer);
+    @PutMapping("/{id}")
+    public ResponseEntity<?> replaceCustomer(@RequestBody CustomerDTO newCustomer, @PathVariable Integer id) {
+        LOG.info("Invoking Rest Service modifyCustomer");
+
+        EntityModel<CustomerDTO> entityModel = business.modify(id, newCustomer);
+
+        return ResponseEntity
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+                .body(entityModel);
     }
 
-    @DeleteMapping("/customers/{id}")
-    public void deleteCustomer(@PathVariable Short id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCustomer(@PathVariable Integer id) {
+        LOG.info("Invoking Rest Service deleteCustomer");
         business.deleteCustomer(id);
+        return ResponseEntity.noContent().build();
     }
 }

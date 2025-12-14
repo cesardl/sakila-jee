@@ -4,6 +4,7 @@ package org.sanmarcux.samples.sakila.dao.model;
 
 import jakarta.persistence.*;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.time.Year;
 import java.util.Date;
@@ -20,6 +21,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Table(name = "film", catalog = "sakila")
 public class Film implements java.io.Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private Short filmId;
     private Language languageByOriginalLanguageId;

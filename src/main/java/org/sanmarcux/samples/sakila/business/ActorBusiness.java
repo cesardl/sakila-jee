@@ -16,15 +16,15 @@ public interface ActorBusiness {
 
     ActorDTO create(ActorDTO payload);
 
-    ActorDTO modify(Short actorId, ActorDTO payload);
+    ActorDTO modify(Integer actorId, ActorDTO payload);
 
-    ActorDTO get(Short actorId);
+    ActorDTO get(Integer actorId);
 
-    void delete(Short actorId);
+    void delete(Integer actorId);
 
-    void createFilmParticipation(Short actorId, Short payload);
+    void createFilmParticipation(Integer actorId, Integer filmId);
 
-    FilmDTO getFilm(Short actorId, Short filmId);
+    FilmDTO getFilm(Integer actorId, Integer filmId);
 
-    void deleteFilm(Short actorId, Short filmId);
+    void deleteFilm(Integer actorId, Integer filmId);
 }

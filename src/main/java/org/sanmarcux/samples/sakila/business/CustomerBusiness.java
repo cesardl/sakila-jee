@@ -13,11 +13,11 @@ public interface CustomerBusiness {
 
     CollectionModel<EntityModel<CustomerDTO>> findAll();
 
-    CustomerDTO save(CustomerDTO payload);
+    EntityModel<CustomerDTO> save(CustomerDTO payload);
 
-    EntityModel<CustomerDTO> get(Short customerId);
+    EntityModel<CustomerDTO> get(Integer customerId);
 
-    CustomerDTO modify(Short id, CustomerDTO payload);
+    EntityModel<CustomerDTO> modify(Integer id, CustomerDTO payload);
 
-    void deleteCustomer(Short id);
+    void deleteCustomer(Integer id);
 }

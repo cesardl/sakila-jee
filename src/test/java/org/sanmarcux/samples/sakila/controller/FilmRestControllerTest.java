@@ -1,7 +1,5 @@
 package org.sanmarcux.samples.sakila.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sanmarcux.samples.sakila.SakilaApplication;
 import org.sanmarcux.samples.sakila.dao.model.Rating;
@@ -12,9 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.Year;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -32,36 +30,50 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class FilmRestControllerTest {
 
-    private final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(), MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);
-
     @Autowired
     private MockMvc mockMvc;
 
-    private static ObjectMapper objectMapper;
-
-    @BeforeAll
-    static void setup() {
-        objectMapper = new ObjectMapper();
-    }
+    @Autowired
+    private JsonMapper mapper;
 
     @Test
     public void readFilms() throws Exception {
-        mockMvc.perform(get("/films/")).andExpect(status().isOk()).andExpect(content().contentType(contentType)).andExpect(jsonPath("$.content", hasSize(3))).andExpect(jsonPath("$.content[0].filmId", is(1))).andExpect(jsonPath("$.content[0].title", is("ACADEMY DINOSAUR"))).andExpect(jsonPath("$.content[0].language.name", is("English"))).andExpect(jsonPath("$.content[1].filmId", is(2))).andExpect(jsonPath("$.content[1].title", is("ACE GOLDFINGER"))).andExpect(jsonPath("$.content[1].language.name", is("English"))).andExpect(jsonPath("$.content[2].filmId", is(3))).andExpect(jsonPath("$.content[2].title", is("ADAPTATION HOLES"))).andExpect(jsonPath("$.content[2].language.name", is("English")));
+        mockMvc.perform(get("/films?size=3"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andExpect(jsonPath("$.content[0].filmId", is(1)))
+                .andExpect(jsonPath("$.content[0].title", is("ACADEMY DINOSAUR")))
+                .andExpect(jsonPath("$.content[0].language.name", is("English")))
+                .andExpect(jsonPath("$.content[1].filmId", is(2)))
+                .andExpect(jsonPath("$.content[1].title", is("ACE GOLDFINGER")))
+                .andExpect(jsonPath("$.content[1].language.name", is("English")))
+                .andExpect(jsonPath("$.content[2].filmId", is(3)))
+                .andExpect(jsonPath("$.content[2].title", is("ADAPTATION HOLES")))
+                .andExpect(jsonPath("$.content[2].language.name", is("English")));
     }
 
     @Test
     public void filmNotFound() throws Exception {
-        mockMvc.perform(get("/films/101")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/films/2000")).andExpect(status().isNotFound());
     }
 
     @Test
     public void readFilmData() throws Exception {
-        mockMvc.perform(get("/films/1")).andExpect(status().isOk()).andExpect(content().contentType(contentType)).andExpect(jsonPath("$.filmId", is(1))).andExpect(jsonPath("$.title", is("ACADEMY DINOSAUR")));
+        mockMvc.perform(get("/films/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.filmId", is(1)))
+                .andExpect(jsonPath("$.title", is("ACADEMY DINOSAUR")));
     }
 
     @Test
     public void createFilm() throws Exception {
-        this.mockMvc.perform(post("/films/").contentType(contentType).content(objectMapper.writeValueAsString(buildFilm()))).andExpect(status().isCreated()).andExpect(header().exists("Location"));
+        this.mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(buildFilm())))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"));
     }
 
     @Test
@@ -69,15 +81,19 @@ public class FilmRestControllerTest {
         FilmDTO film = buildFilm();
         film.getLanguage().setId(100);
 
-        this.mockMvc.perform(post("/films/").contentType(contentType).content(objectMapper.writeValueAsString(film))).andExpect(status().isNotFound());
+        this.mockMvc.perform(post("/films/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(film))).andExpect(status().isNotFound());
     }
 
     @Test
     public void createFilmWithSendingFilmId() throws Exception {
         FilmDTO film = buildFilm();
-        film.setFilmId((short) 1);
+        film.setFilmId(1);
 
-        this.mockMvc.perform(post("/films/").contentType(contentType).content(objectMapper.writeValueAsString(film))).andExpect(status().isBadRequest());
+        this.mockMvc.perform(post("/films")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(film))).andExpect(status().isBadRequest());
     }
 
     private FilmDTO buildFilm() {

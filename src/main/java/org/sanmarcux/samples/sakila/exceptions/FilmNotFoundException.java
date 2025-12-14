@@ -13,7 +13,7 @@ public class FilmNotFoundException extends RuntimeException {
 
     private static final long serialVersionUID = 8732907115274367029L;
 
-    public FilmNotFoundException(final Short filmId) {
+    public FilmNotFoundException(final Integer filmId) {
         super("Could not find film with id '" + filmId + "'.");
     }
 }
