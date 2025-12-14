@@ -4,6 +4,7 @@ package org.sanmarcux.samples.sakila.dao.model;
 
 import jakarta.persistence.*;
 
+import java.io.Serial;
 import java.util.Date;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Table(name = "customer", catalog = "sakila")
 public class Customer implements java.io.Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private Short customerId;
     private Address address;
@@ -125,7 +127,6 @@ public class Customer implements java.io.Serializable {
         this.active = active;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "create_date", nullable = false, length = 19)
     public Date getCreateDate() {
         return this.createDate;
@@ -135,7 +136,6 @@ public class Customer implements java.io.Serializable {
         this.createDate = createDate;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update", nullable = false, length = 19)
     public Date getLastUpdate() {
         return this.lastUpdate;

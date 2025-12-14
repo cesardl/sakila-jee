@@ -97,7 +97,6 @@ public class Payment implements java.io.Serializable {
         this.amount = amount;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "payment_date", nullable = false, length = 19)
     public Date getPaymentDate() {
         return this.paymentDate;
@@ -107,7 +106,6 @@ public class Payment implements java.io.Serializable {
         this.paymentDate = paymentDate;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update", nullable = false, length = 19)
     public Date getLastUpdate() {
         return this.lastUpdate;

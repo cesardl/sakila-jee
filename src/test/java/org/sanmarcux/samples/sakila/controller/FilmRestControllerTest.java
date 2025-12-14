@@ -1,6 +1,7 @@
 package org.sanmarcux.samples.sakila.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sanmarcux.samples.sakila.SakilaApplication;
 import org.sanmarcux.samples.sakila.dao.model.Rating;
@@ -36,8 +37,12 @@ public class FilmRestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private static ObjectMapper objectMapper;
+
+    @BeforeAll
+    static void setup() {
+        objectMapper = new ObjectMapper();
+    }
 
     @Test
     public void readFilms() throws Exception {

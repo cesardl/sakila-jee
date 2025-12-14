@@ -76,7 +76,6 @@ public class Store implements java.io.Serializable {
         this.address = address;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update", nullable = false, length = 19)
     public Date getLastUpdate() {
         return this.lastUpdate;

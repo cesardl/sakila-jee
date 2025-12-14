@@ -92,7 +92,6 @@ public class Rental implements java.io.Serializable {
         this.inventory = inventory;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "rental_date", nullable = false, length = 19)
     public Date getRentalDate() {
         return this.rentalDate;
@@ -102,7 +101,6 @@ public class Rental implements java.io.Serializable {
         this.rentalDate = rentalDate;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "return_date", length = 19)
     public Date getReturnDate() {
         return this.returnDate;
@@ -112,7 +110,6 @@ public class Rental implements java.io.Serializable {
         this.returnDate = returnDate;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update", nullable = false, length = 19)
     public Date getLastUpdate() {
         return this.lastUpdate;

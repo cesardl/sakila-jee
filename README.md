@@ -9,3 +9,6 @@ docker run --name sakila-db -p 3314:3306 --restart on-failure -e MYSQL_DATABASE=
 ```
 docker exec -u 0 -it sakila-db bash
 ```
+
+
+https://spring.io/guides/tutorials/rest

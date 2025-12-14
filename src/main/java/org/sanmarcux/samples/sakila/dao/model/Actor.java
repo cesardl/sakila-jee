@@ -31,7 +31,6 @@ public class Actor implements java.io.Serializable {
     @Column(name = "last_name", nullable = false, length = 45)
     private String lastName;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update", nullable = false, length = 19)
     private Date lastUpdate;
 

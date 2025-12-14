@@ -63,7 +63,6 @@ public class FilmActor implements java.io.Serializable {
         this.film = film;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update", nullable = false, length = 19)
     public Date getLastUpdate() {
         return this.lastUpdate;

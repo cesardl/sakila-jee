@@ -4,6 +4,7 @@ package org.sanmarcux.samples.sakila.dao.model;
 
 import jakarta.persistence.*;
 
+import java.io.Serial;
 import java.util.Date;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Table(name = "staff", catalog = "sakila")
 public class Staff implements java.io.Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private Byte staffId;
     private Address address;
@@ -159,7 +161,6 @@ public class Staff implements java.io.Serializable {
         this.password = password;
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update", nullable = false, length = 19)
     public Date getLastUpdate() {
         return this.lastUpdate;
