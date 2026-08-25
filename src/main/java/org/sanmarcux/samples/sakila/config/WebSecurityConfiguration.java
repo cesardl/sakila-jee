@@ -133,7 +133,10 @@ public class WebSecurityConfiguration {
         return http
                 .securityMatcher(EndpointRequest.toAnyEndpoint())
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .csrf(csrf -> csrf.disable())
+                // CSRF protection is deliberately left ON here. Boot exposes only /health
+                // over HTTP by default and it is a GET, so the filter never rejects
+                // anything -- and if a POST endpoint is exposed later, defaulting to
+                // protected is the right side to fail on.
                 .build();
     }
 
@@ -142,9 +145,16 @@ public class WebSecurityConfiguration {
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(Customizer.withDefaults())
-                // Safe only because this API is stateless and authenticates from a header
-                // rather than an ambient cookie. If the token ever moves into a cookie,
-                // CSRF protection has to come back in the same commit.
+                // CodeQL flags this as java/spring-disabled-csrf-protection. It is a false
+                // positive for a stateless bearer-token API: CSRF is exploitable only when
+                // the browser attaches credentials AMBIENTLY (a cookie, or HTTP Basic), and
+                // a token in the Authorization header is never attached automatically on a
+                // cross-origin request. An attacker's page cannot make the victim send it.
+                //
+                // That argument rests on three conditions, all enforced immediately below:
+                // STATELESS sessions (no JSESSIONID is ever issued), httpBasic disabled, and
+                // formLogin disabled. If ANY of those changes -- above all, if the token
+                // moves into a cookie -- CSRF protection must be restored in the same commit.
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
