@@ -48,7 +48,7 @@ public class ActorRestController {
     public ResponseEntity<Page<ActorDTO>> listActors(final Principal principal, final Pageable pageable) {
         LOG.info("Invoking Rest Service listActors");
 
-        LOG.debug("Principal name {}", principal.getName());
+        LOG.debug("Principal name {}", principal != null ? principal.getName() : "anonymous");
 
         Page<ActorDTO> actors = actorBusiness.list(pageable);
 

@@ -152,7 +152,9 @@ public class Staff implements java.io.Serializable {
         this.username = username;
     }
 
-    @Column(name = "password", length = 40)
+    // 255 to fit Spring Security DelegatingPasswordEncoder hashes:
+    // {bcrypt} = 68 chars, {argon2} ~= 123, {scrypt} can exceed 200.
+    @Column(name = "password", length = 255)
     public String getPassword() {
         return this.password;
     }
