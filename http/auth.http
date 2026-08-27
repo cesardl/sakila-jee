@@ -1,0 +1,140 @@
+### Authentication. Run this whole file with the double-arrow gutter icon.
+# Everything here is a security assertion, so a green run is the actual claim:
+# the API is closed by default and the signature is verified, not just parsed.
+
+### 1. Log in. Stores the token globally, so the other files can run standalone.
+# @name login
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{"username": "{{username}}", "password": "{{password}}"}
+
+> ./save-token.js
+
+### 2. The token opens a protected endpoint.
+GET {{host}}/actors?size=1
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("200 with the token", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(response.contentType.mimeType === "application/json",
+            "expected JSON, got " + response.contentType.mimeType);
+    });
+%}
+
+### 3. No token at all -> 401 with a Bearer challenge.
+GET {{host}}/actors
+
+> {%
+    client.test("401 without a token", function () {
+        client.assert(response.status === 401, "expected 401, got " + response.status);
+    });
+
+    client.test("challenge invites a bearer token", function () {
+        var challenge = String(response.headers.valueOf("WWW-Authenticate"));
+        client.assert(challenge.indexOf("Bearer") === 0,
+            "expected a Bearer challenge, got: " + challenge);
+    });
+%}
+
+### 4. A structurally invalid token -> 401.
+GET {{host}}/actors
+Authorization: Bearer not.a.jwt
+
+> {%
+    client.test("401 for a malformed token", function () {
+        client.assert(response.status === 401, "expected 401, got " + response.status);
+    });
+%}
+
+### 5. A VALID token with one character appended to the signature -> 401.
+# This is the one that matters: #4 only proves the token could not be parsed.
+# This proves the HS256 signature is actually verified, which is the difference
+# between authentication and decoration.
+GET {{host}}/actors
+Authorization: Bearer {{auth_token}}x
+
+> {%
+    client.test("401 for a tampered signature", function () {
+        client.assert(response.status === 401,
+            "SIGNATURE NOT VERIFIED - a modified token was accepted with " + response.status);
+    });
+%}
+
+### 6. Wrong password -> 401, generic body.
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{"username": "{{username}}", "password": "definitely-not-the-password"}
+
+> {%
+    client.test("401 on a wrong password", function () {
+        client.assert(response.status === 401, "expected 401, got " + response.status);
+    });
+
+    client.global.set("wrong_password_body", JSON.stringify(response.body));
+%}
+
+### 7. Unknown user -> byte-identical response to a wrong password.
+# Username enumeration check: if these two ever diverge, an attacker can harvest
+# valid usernames without guessing a single password.
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{"username": "no-such-user-here", "password": "definitely-not-the-password"}
+
+> {%
+    client.test("401 on an unknown user", function () {
+        client.assert(response.status === 401, "expected 401, got " + response.status);
+    });
+
+    client.test("indistinguishable from a wrong password", function () {
+        client.assert(JSON.stringify(response.body) === client.global.get("wrong_password_body"),
+            "username enumeration: unknown-user body differs from wrong-password body");
+    });
+%}
+
+### 8. Staff row with a NULL password (Jon, from stock sakila-data.sql) -> 401, not 500.
+# A NULL password is not a login. A 500 here would leak that the row exists.
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{"username": "Jon", "password": "anything"}
+
+> {%
+    client.test("401 rather than 500 for a NULL-password row", function () {
+        client.assert(response.status === 401, "expected 401, got " + response.status);
+    });
+%}
+
+### 9. Blank username -> 400. Bean validation rejects it before authentication runs.
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{"username": "", "password": "x"}
+
+> {%
+    client.test("400 on a blank username", function () {
+        client.assert(response.status === 400, "expected 400, got " + response.status);
+    });
+%}
+
+### 10. CORS preflight must pass without credentials.
+# Browsers never attach Authorization to a preflight, so a 401 here breaks every
+# cross-origin call from the planned Vue app before it is even sent.
+OPTIONS {{host}}/actors
+Origin: http://localhost:5173
+Access-Control-Request-Method: GET
+Access-Control-Request-Headers: authorization
+
+> {%
+    client.test("preflight succeeds unauthenticated", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+    });
+
+    client.test("origin is echoed back", function () {
+        client.assert(String(response.headers.valueOf("Access-Control-Allow-Origin")) === "http://localhost:5173",
+            "missing or wrong Access-Control-Allow-Origin");
+    });
+%}

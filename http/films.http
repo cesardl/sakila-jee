@@ -1,0 +1,158 @@
+### Films. Self-contained: logs in first, so it can be run on its own.
+
+### Log in.
+# @name login
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{"username": "{{username}}", "password": "{{password}}"}
+
+> ./save-token.js
+
+### Page of films.
+GET {{host}}/films?page=0&size=3
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("200 JSON", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(response.contentType.mimeType === "application/json", "expected JSON");
+    });
+
+    client.test("page is honoured", function () {
+        client.assert(response.body.content.length === 3,
+            "expected 3 rows, got " + response.body.content.length);
+    });
+
+    client.test("film 1 is ACADEMY DINOSAUR", function () {
+        var first = response.body.content[0];
+        client.assert(first.filmId === 1 && first.title === "ACADEMY DINOSAUR",
+            "unexpected first row: " + JSON.stringify(first));
+        client.assert(first.language.name === "English", "language was not resolved");
+    });
+
+    // Stock sakila-data.sql ships exactly 1000 films. Anything above that is left over
+    // from a POST that was never cleaned up - there is no DELETE /films to undo one.
+    if (response.body.totalElements !== 1000) {
+        client.log("WARNING: " + response.body.totalElements + " films, expected 1000. "
+            + (response.body.totalElements - 1000) + " leftover row(s) from past create runs.");
+    }
+%}
+
+### Sorting is Spring Data's, straight off Pageable - worth pinning so a later
+# controller change cannot quietly drop it.
+GET {{host}}/films?size=1&sort=title,desc
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("desc sort puts ZOOLANDER FICTION first", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(response.body.content[0].title === "ZOOLANDER FICTION",
+            "sort ignored - got " + response.body.content[0].title);
+    });
+%}
+
+### Single film.
+GET {{host}}/films/1
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("200 with film 1", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(response.body.title === "ACADEMY DINOSAUR", "wrong film");
+        client.assert(response.body.rating === "PARENTAL_GUIDANCE_SUGGESTED",
+            "rating serialised as " + response.body.rating
+            + " - RatingConverter maps the DB code, JSON uses the enum name");
+    });
+%}
+
+### Unknown film -> 404.
+GET {{host}}/films/9999
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("404 for an unknown film", function () {
+        client.assert(response.status === 404, "expected 404, got " + response.status);
+    });
+%}
+
+### Film id above 32767 -> 500. Characterization test for a type mismatch:
+#
+#   Film.filmId          is Short
+#   FilmRepository       is JpaRepository<Film, Integer>
+#   FilmRestController   takes @PathVariable Integer
+#
+# so any id past Short.MAX_VALUE blows up in the Integer->Short conversion instead of
+# missing cleanly. Two consequences: unknown ids in that range answer 500 rather than
+# 404, and films 32768-65535 are unreachable even though film_id is SMALLINT UNSIGNED
+# (max 65535). Actors and customers use Integer end to end and answer 404 correctly.
+#
+# Fixing means settling on one type across entity, repository, DTO and controller.
+# When that lands this request starts failing - that is the cue to delete it.
+GET {{host}}/films/40000
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("KNOWN BUG: film id > Short.MAX_VALUE gives 500, not 404", function () {
+        client.assert(response.status === 500,
+            "the Short/Integer mismatch looks fixed (got " + response.status + ") - drop this request");
+    });
+%}
+
+### ---------------------------------------------------------------------------
+### Rejection cases. These are safe to run - nothing is written.
+### ---------------------------------------------------------------------------
+
+### Client-supplied id on create -> 400.
+POST {{host}}/films
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "filmId": 1,
+  "title": "Rejected film",
+  "language": {"id": 1},
+  "rentalRate": 0.99,
+  "replacementCost": 20.99
+}
+
+> {%
+    client.test("400 when the payload sets an id", function () {
+        client.assert(response.status === 400, "expected 400, got " + response.status);
+    });
+%}
+
+### Unregistered language -> 404.
+POST {{host}}/films
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "title": "Rejected film",
+  "language": {"id": 100},
+  "rentalRate": 0.99,
+  "replacementCost": 20.99
+}
+
+> {%
+    client.test("404 for a language that does not exist", function () {
+        client.assert(response.status === 404, "expected 404, got " + response.status);
+    });
+%}
+
+### Missing required field -> 400.
+POST {{host}}/films
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{"title": "Rejected film", "language": {"id": 1}}
+
+> {%
+    client.test("400 when rentalRate/replacementCost are missing", function () {
+        client.assert(response.status === 400, "expected 400, got " + response.status);
+    });
+%}
+
+### The one request that writes a film lives in films-write.http, on its own,
+### because it cannot be undone through the API and IntelliJ has no way to skip
+### a request during "Run all". Everything in THIS file is read-only.
