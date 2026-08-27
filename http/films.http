@@ -14,18 +14,20 @@ GET {{host}}/films?page=0&size=3
 Authorization: Bearer {{auth_token}}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("200 JSON", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
         client.assert(response.contentType.mimeType === "application/json", "expected JSON");
     });
 
     client.test("page is honoured", function () {
-        client.assert(response.body.content.length === 3,
-            "expected 3 rows, got " + response.body.content.length);
+        client.assert(body.content.length === 3,
+            "expected 3 rows, got " + body.content.length);
     });
 
     client.test("film 1 is ACADEMY DINOSAUR", function () {
-        var first = response.body.content[0];
+        var first = body.content[0];
         client.assert(first.filmId === 1 && first.title === "ACADEMY DINOSAUR",
             "unexpected first row: " + JSON.stringify(first));
         client.assert(first.language.name === "English", "language was not resolved");
@@ -33,9 +35,9 @@ Authorization: Bearer {{auth_token}}
 
     // Stock sakila-data.sql ships exactly 1000 films. Anything above that is left over
     // from a POST that was never cleaned up - there is no DELETE /films to undo one.
-    if (response.body.totalElements !== 1000) {
-        client.log("WARNING: " + response.body.totalElements + " films, expected 1000. "
-            + (response.body.totalElements - 1000) + " leftover row(s) from past create runs.");
+    if (body.totalElements !== 1000) {
+        client.log("WARNING: " + body.totalElements + " films, expected 1000. "
+            + (body.totalElements - 1000) + " leftover row(s) from past create runs.");
     }
 %}
 
@@ -45,10 +47,12 @@ GET {{host}}/films?size=1&sort=title,desc
 Authorization: Bearer {{auth_token}}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("desc sort puts ZORRO ARK first", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.content[0].title === "ZORRO ARK",
-            "sort ignored - got " + response.body.content[0].title);
+        client.assert(body.content[0].title === "ZORRO ARK",
+            "sort ignored - got " + body.content[0].title);
     });
 %}
 
@@ -57,11 +61,13 @@ GET {{host}}/films/1
 Authorization: Bearer {{auth_token}}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("200 with film 1", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.title === "ACADEMY DINOSAUR", "wrong film");
-        client.assert(response.body.rating === "PARENTAL_GUIDANCE_SUGGESTED",
-            "rating serialised as " + response.body.rating
+        client.assert(body.title === "ACADEMY DINOSAUR", "wrong film");
+        client.assert(body.rating === "PARENTAL_GUIDANCE_SUGGESTED",
+            "rating serialised as " + body.rating
             + " - RatingConverter maps the DB code, JSON uses the enum name");
     });
 %}

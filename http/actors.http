@@ -15,20 +15,22 @@ GET {{host}}/actors?page=0&size=2
 Authorization: Bearer {{auth_token}}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("200 JSON", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
         client.assert(response.contentType.mimeType === "application/json", "expected JSON");
     });
 
     client.test("page is honoured", function () {
-        client.assert(response.body.content.length === 2,
-            "expected 2 rows, got " + response.body.content.length);
-        client.assert(response.body.totalElements >= 200,
-            "expected the full sakila dump (200+ actors), got " + response.body.totalElements);
+        client.assert(body.content.length === 2,
+            "expected 2 rows, got " + body.content.length);
+        client.assert(body.totalElements >= 200,
+            "expected the full sakila dump (200+ actors), got " + body.totalElements);
     });
 
     client.test("actor 1 is PENELOPE GUINESS", function () {
-        var first = response.body.content[0];
+        var first = body.content[0];
         client.assert(first.actorId === 1 && first.firstName === "PENELOPE" && first.lastName === "GUINESS",
             "unexpected first row: " + JSON.stringify(first));
     });
@@ -39,9 +41,11 @@ GET {{host}}/actors/1
 Authorization: Bearer {{auth_token}}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("200 with actor 1", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.actorId === 1, "wrong actor returned");
+        client.assert(body.actorId === 1, "wrong actor returned");
     });
 %}
 
@@ -60,10 +64,12 @@ GET {{host}}/actors/100/films
 Authorization: Bearer {{auth_token}}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("actor 100 has 24 films", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.length === 24,
-            "expected 24 films, got " + response.body.length);
+        client.assert(body.length === 24,
+            "expected 24 films, got " + body.length);
     });
 %}
 
@@ -72,9 +78,11 @@ GET {{host}}/actors/1/films/1
 Authorization: Bearer {{auth_token}}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("200 ACADEMY DINOSAUR", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.title === "ACADEMY DINOSAUR", "wrong film");
+        client.assert(body.title === "ACADEMY DINOSAUR", "wrong film");
     });
 %}
 
@@ -118,9 +126,11 @@ GET {{new_actor_url}}
 Authorization: Bearer {{auth_token}}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("the created actor is readable", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.firstName === "HTTPCLIENT", "wrong row at the Location URL");
+        client.assert(body.firstName === "HTTPCLIENT", "wrong row at the Location URL");
     });
 %}
 
@@ -137,9 +147,11 @@ Content-Type: application/json
 {"firstName": "HTTPCLIENT", "lastName": "PATCHED"}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("200 and the change stuck", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.lastName === "PATCHED", "lastName was not updated");
+        client.assert(body.lastName === "PATCHED", "lastName was not updated");
     });
 %}
 

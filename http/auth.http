@@ -69,11 +69,13 @@ Content-Type: application/json
 {"username": "{{username}}", "password": "definitely-not-the-password"}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("401 on a wrong password", function () {
         client.assert(response.status === 401, "expected 401, got " + response.status);
     });
 
-    client.global.set("wrong_password_body", JSON.stringify(response.body));
+    client.global.set("wrong_password_body", JSON.stringify(body));
 %}
 
 ### 7. Unknown user -> byte-identical response to a wrong password.
@@ -85,12 +87,14 @@ Content-Type: application/json
 {"username": "no-such-user-here", "password": "definitely-not-the-password"}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("401 on an unknown user", function () {
         client.assert(response.status === 401, "expected 401, got " + response.status);
     });
 
     client.test("indistinguishable from a wrong password", function () {
-        client.assert(JSON.stringify(response.body) === client.global.get("wrong_password_body"),
+        client.assert(JSON.stringify(body) === client.global.get("wrong_password_body"),
             "username enumeration: unknown-user body differs from wrong-password body");
     });
 %}
@@ -105,6 +109,31 @@ Content-Type: application/json
 > {%
     client.test("401 rather than 500 for a NULL-password row", function () {
         client.assert(response.status === 401, "expected 401, got " + response.status);
+    });
+%}
+
+### 8b. Disabled staff account -> 401, with the CORRECT password.
+# The 'disabled' row is seeded by auth-fixture.sql with active = 0 and cesar's password
+# hash, so the credentials below are valid and only the disabled flag may reject them.
+# Also the timing check: this must not answer noticeably faster than #6, or the latency
+# alone tells an attacker which accounts exist but are switched off. See the
+# post-authentication checker in WebSecurityConfiguration.
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{"username": "disabled", "password": "cesar"}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+
+    client.test("401 for a disabled account holding a valid password", function () {
+        client.assert(response.status === 401, "expected 401, got " + response.status);
+    });
+
+    client.test("same generic body as every other login failure", function () {
+        client.assert(JSON.stringify(body) === client.global.get("wrong_password_body"),
+            "a disabled account is distinguishable from a wrong password");
     });
 %}
 

@@ -15,24 +15,26 @@ GET {{host}}/customers
 Authorization: Bearer {{auth_token}}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("200 JSON", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
     });
 
     client.test("_embedded collection is present", function () {
-        client.assert(response.body._embedded !== undefined, "no _embedded in the response");
-        client.assert(response.body._embedded.customerDTOList.length > 0, "empty collection");
+        client.assert(body._embedded !== undefined, "no _embedded in the response");
+        client.assert(body._embedded.customerDTOList.length > 0, "empty collection");
     });
 
     client.test("every item carries a self link", function () {
-        var first = response.body._embedded.customerDTOList[0];
+        var first = body._embedded.customerDTOList[0];
         client.assert(first._links.self.href.indexOf("/customers/" + first.customerId) > 0,
             "self link does not point at the item: " + first._links.self.href);
     });
 
     // Unpaged: the whole table is serialised on every call. Fine at 599 rows, worth
     // remembering before this endpoint is put in front of anything real.
-    var count = response.body._embedded.customerDTOList.length;
+    var count = body._embedded.customerDTOList.length;
     if (count !== 599) {
         client.log("WARNING: " + count + " customers, expected 599. "
             + (count - 599) + " leftover row(s) from past create runs.");
@@ -44,16 +46,17 @@ GET {{host}}/customers/1
 Authorization: Bearer {{auth_token}}
 
 > {%
-    var resp = JSON.parse(response.body);
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
 
     client.test("200 MARY SMITH", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(resp.firstName === "MARY", "wrong customer");
+        client.assert(body.firstName === "MARY", "wrong customer");
     });
 
     client.test("self and collection links", function () {
-        client.assert(resp._links.self !== undefined, "no self link");
-        client.assert(resp._links.customers !== undefined, "no collection link");
+        client.assert(body._links.self !== undefined, "no self link");
+        client.assert(body._links.customers !== undefined, "no collection link");
     });
 %}
 
@@ -86,24 +89,25 @@ Content-Type: application/json
 }
 
 > {%
-    var resp = JSON.parse(response.body);
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
 
     client.test("201 with a self link", function () {
         client.assert(response.status === 201, "expected 201, got " + response.status);
-        client.assert(resp._links.self.href.length > 0, "no self link in the body");
+        client.assert(body._links.self.href.length > 0, "no self link in the body");
     });
 
     // Characterization test, not an endorsement: CustomerBusinessImpl.save() throws away
     // the store and address from the payload and hardcodes 2 and 591. Pinned here so the
     // day that is fixed, this fails and tells you why instead of going unnoticed.
     client.test("KNOWN BUG: store/address from the payload are ignored", function () {
-        client.assert(resp.store.storeId === 2 && resp.address.addressId === 591,
-            "save() looks fixed (store " + resp.store.storeId
-            + ", address " + resp.address.addressId
+        client.assert(body.store.storeId === 2 && body.address.addressId === 591,
+            "save() looks fixed (store " + body.store.storeId
+            + ", address " + body.address.addressId
             + ") - drop this assertion and the note above it");
     });
 
-    client.global.set("new_customer_url", resp._links.self.href);
+    client.global.set("new_customer_url", body._links.self.href);
 %}
 
 ### Follow the self link.
@@ -111,10 +115,11 @@ GET {{new_customer_url}}
 Authorization: Bearer {{auth_token}}
 
 > {%
-    var resp = JSON.parse(response.body);
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("the created customer is readable", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(resp.firstName === "HTTPCLIENT", "wrong row at the self link");
+        client.assert(body.firstName === "HTTPCLIENT", "wrong row at the self link");
     });
 %}
 
@@ -132,9 +137,10 @@ Content-Type: application/json
 }
 
 > {%
-    var resp = JSON.parse(response.body);
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("the change stuck", function () {
-        client.assert(resp.lastName === "REPLACED", "lastName was not updated");
+        client.assert(body.lastName === "REPLACED", "lastName was not updated");
     });
 
     // Characterization test: replaceCustomer() answers ResponseEntity.created(), so an

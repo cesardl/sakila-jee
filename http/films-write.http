@@ -51,9 +51,11 @@ GET {{new_film_url}}
 Authorization: Bearer {{auth_token}}
 
 > {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
     client.test("the created film is readable", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.title.indexOf("HTTPCLIENT PROBE") === 0,
+        client.assert(body.title.indexOf("HTTPCLIENT PROBE") === 0,
             "wrong row at the Location URL");
     });
 %}
