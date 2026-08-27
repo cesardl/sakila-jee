@@ -45,9 +45,9 @@ GET {{host}}/films?size=1&sort=title,desc
 Authorization: Bearer {{auth_token}}
 
 > {%
-    client.test("desc sort puts ZOOLANDER FICTION first", function () {
+    client.test("desc sort puts ZORRO ARK first", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.content[0].title === "ZOOLANDER FICTION",
+        client.assert(response.body.content[0].title === "ZORRO ARK",
             "sort ignored - got " + response.body.content[0].title);
     });
 %}

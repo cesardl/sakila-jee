@@ -44,14 +44,16 @@ GET {{host}}/customers/1
 Authorization: Bearer {{auth_token}}
 
 > {%
+    var resp = JSON.parse(response.body);
+
     client.test("200 MARY SMITH", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.firstName === "MARY", "wrong customer");
+        client.assert(resp.firstName === "MARY", "wrong customer");
     });
 
     client.test("self and collection links", function () {
-        client.assert(response.body._links.self !== undefined, "no self link");
-        client.assert(response.body._links.customers !== undefined, "no collection link");
+        client.assert(resp._links.self !== undefined, "no self link");
+        client.assert(resp._links.customers !== undefined, "no collection link");
     });
 %}
 
@@ -84,22 +86,24 @@ Content-Type: application/json
 }
 
 > {%
+    var resp = JSON.parse(response.body);
+
     client.test("201 with a self link", function () {
         client.assert(response.status === 201, "expected 201, got " + response.status);
-        client.assert(response.body._links.self.href.length > 0, "no self link in the body");
+        client.assert(resp._links.self.href.length > 0, "no self link in the body");
     });
 
     // Characterization test, not an endorsement: CustomerBusinessImpl.save() throws away
     // the store and address from the payload and hardcodes 2 and 591. Pinned here so the
     // day that is fixed, this fails and tells you why instead of going unnoticed.
     client.test("KNOWN BUG: store/address from the payload are ignored", function () {
-        client.assert(response.body.store.storeId === 2 && response.body.address.addressId === 591,
-            "save() looks fixed (store " + response.body.store.storeId
-            + ", address " + response.body.address.addressId
+        client.assert(resp.store.storeId === 2 && resp.address.addressId === 591,
+            "save() looks fixed (store " + resp.store.storeId
+            + ", address " + resp.address.addressId
             + ") - drop this assertion and the note above it");
     });
 
-    client.global.set("new_customer_url", response.body._links.self.href);
+    client.global.set("new_customer_url", resp._links.self.href);
 %}
 
 ### Follow the self link.
@@ -107,9 +111,10 @@ GET {{new_customer_url}}
 Authorization: Bearer {{auth_token}}
 
 > {%
+    var resp = JSON.parse(response.body);
     client.test("the created customer is readable", function () {
         client.assert(response.status === 200, "expected 200, got " + response.status);
-        client.assert(response.body.firstName === "HTTPCLIENT", "wrong row at the self link");
+        client.assert(resp.firstName === "HTTPCLIENT", "wrong row at the self link");
     });
 %}
 
@@ -127,8 +132,9 @@ Content-Type: application/json
 }
 
 > {%
+    var resp = JSON.parse(response.body);
     client.test("the change stuck", function () {
-        client.assert(response.body.lastName === "REPLACED", "lastName was not updated");
+        client.assert(resp.lastName === "REPLACED", "lastName was not updated");
     });
 
     // Characterization test: replaceCustomer() answers ResponseEntity.created(), so an
