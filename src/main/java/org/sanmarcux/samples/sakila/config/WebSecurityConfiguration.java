@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -100,6 +101,18 @@ public class WebSecurityConfiguration {
                                                        PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
+        // The default pre-authentication check rejects a disabled account before the
+        // bcrypt comparison runs, making it measurably faster than a wrong password on
+        // an active account -- response timing then tells an attacker which staff rows
+        // are disabled. Running the same check afterwards keeps the cost uniform.
+        //
+        // Nothing is lost by the swap: AccountStatusUserDetailsChecker asserts exactly
+        // the union of the two defaults it replaces -- accountNonLocked/enabled/
+        // accountNonExpired from the pre check, credentialsNonExpired from the post one.
+        // Only the timing moves.
+        provider.setPreAuthenticationChecks(user -> {
+        });
+        provider.setPostAuthenticationChecks(new AccountStatusUserDetailsChecker());
         return new ProviderManager(provider);
     }
 
@@ -126,6 +139,10 @@ public class WebSecurityConfiguration {
      * <p>
      * Removing either management.server.* property would publish these endpoints
      * unauthenticated on the API port. Add authorization here before doing that.
+     * <p>
+     * This chain IS consulted on the management port, despite that port running in its
+     * own child context -- verified by temporarily swapping permitAll for denyAll, which
+     * turned GET :8182/actuator/health into a 403. Do not delete it as dead code.
      */
     @Bean
     @Order(1)

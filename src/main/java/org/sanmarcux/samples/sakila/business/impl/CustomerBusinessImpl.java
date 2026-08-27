@@ -20,7 +20,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,9 +76,9 @@ public class CustomerBusinessImpl implements CustomerBusiness {
         a.setAddressId(591);
         c.setAddress(a);
 
-        Date d = new Date();
-        c.setCreateDate(d);
-        c.setLastUpdate(d);
+        LocalDateTime now = LocalDateTime.now();
+        c.setCreateDate(now);
+        c.setLastUpdate(now);
 
         CustomerDTO dto = modelMapper.map(customerRepository.save(c), CustomerDTO.class);
         return assembler.toModel(dto);
@@ -107,7 +107,7 @@ public class CustomerBusinessImpl implements CustomerBusiness {
 
         modelMapper.map(payload, managedCustomer);
 
-        managedCustomer.setLastUpdate(new Date());
+        managedCustomer.setLastUpdate(LocalDateTime.now());
 
         CustomerDTO dto = modelMapper.map(customerRepository.save(managedCustomer), CustomerDTO.class);
         return assembler.toModel(dto);

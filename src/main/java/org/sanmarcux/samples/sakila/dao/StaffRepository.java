@@ -10,7 +10,7 @@ import java.util.Optional;
  *
  * @author Cesardl
  */
-public interface StaffRepository extends CrudRepository<Staff, Byte> {
+public interface StaffRepository extends CrudRepository<Staff, Integer> {
 
     Optional<Staff> findByUsername(String username);
 }

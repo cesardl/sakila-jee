@@ -34,11 +34,17 @@ WHERE username = 'Mike';
 -- the unique index above makes re-running this a no-op on a long-lived dev database.
 --
 -- Dev fixture credentials, never intended to leave a local machine:
---   Mike   / 12345
---   claude / claude
---   cesar  / cesar
+--   Mike     / 12345
+--   claude   / claude
+--   cesar    / cesar
+--   disabled / cesar  -- active = 0, so this one must never authenticate
 INSERT IGNORE INTO staff (first_name, last_name, address_id, email, store_id, active, username, password)
 VALUES ('Claude', 'Sonnet', 3, 'claude@sakilastaff.com', 1, 1, 'claude',
         '{bcrypt}$2a$10$nZxKYL49tRMUjwmOeoJI0OmnHPMzNm1bO5cyWgJdQfVkp/3FWSeDu'),
        ('Cesar', 'Diaz', 4, 'cesar@sakilastaff.com', 2, 1, 'cesar',
+        '{bcrypt}$2a$10$CtbOHh9VbqO.P9G/gh3UNeNU8JRAfHBMuuGWvoMS6zdOGPBm58tCq'),
+       -- Deactivated account. Exists so AuthRestControllerTest can prove a disabled
+       -- staff row is rejected, and rejected the same way an active one with a wrong
+       -- password is. Shares cesar's hash: the password is valid, the account is not.
+       ('Disabled', 'Account', 4, 'disabled@sakilastaff.com', 2, 0, 'disabled',
         '{bcrypt}$2a$10$CtbOHh9VbqO.P9G/gh3UNeNU8JRAfHBMuuGWvoMS6zdOGPBm58tCq');

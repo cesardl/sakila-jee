@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.security.Principal;
 import java.util.List;
 
 /**
@@ -45,10 +44,8 @@ public class ActorRestController {
      */
     @GetMapping
     @ResponseBody
-    public ResponseEntity<Page<ActorDTO>> listActors(final Principal principal, final Pageable pageable) {
+    public ResponseEntity<Page<ActorDTO>> listActors(final Pageable pageable) {
         LOG.info("Invoking Rest Service listActors");
-
-        LOG.debug("Principal name {}", principal != null ? principal.getName() : "anonymous");
 
         Page<ActorDTO> actors = actorBusiness.list(pageable);
 

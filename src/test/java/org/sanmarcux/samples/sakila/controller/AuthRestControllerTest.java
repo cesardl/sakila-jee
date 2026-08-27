@@ -95,6 +95,20 @@ public class AuthRestControllerTest extends AbstractIntegrationTest {
     }
 
     /**
+     * 'disabled' is seeded with active = 0 and cesar's password hash, so the credentials
+     * below are CORRECT. Only the disabled flag may reject them, and it must do so with
+     * the same generic 401 as every other failure.
+     */
+    @Test
+    public void rejectsDisabledStaffAccount() throws Exception {
+        mockMvc.perform(post("/auth/token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"disabled\",\"password\":\"cesar\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error", is("invalid_credentials")));
+    }
+
+    /**
      * A CORS preflight carries no Authorization header. If this 401s, the Vue SPA breaks
      * in a way that is genuinely painful to debug.
      */
