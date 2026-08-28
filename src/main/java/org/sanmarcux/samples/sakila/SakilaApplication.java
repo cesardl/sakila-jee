@@ -30,20 +30,10 @@ public class SakilaApplication {
         // mapping silently produced a null language. Only the /films list hid it, by
         // hand-building the LanguageDTO; /films/{id}, /actors/{id}/films and
         // /actors/{id}/films/{filmId} all returned a film with no language at all.
-        //
-        // A post-converter rather than addMapping(Film::getLanguageByLanguageId, ...):
-        // ModelMapper 2.3.0's method-reference API proxies the source type, and proxying
-        // Language fails on JDK 21 inside its bundled ByteBuddy.
-        modelMapper.typeMap(Film.class, FilmDTO.class).setPostConverter(context -> {
-            Language language = context.getSource().getLanguageByLanguageId();
-            if (language != null) {
-                LanguageDTO dto = new LanguageDTO();
-                dto.setId(language.getLanguageId());
-                dto.setName(language.getName());
-                context.getDestination().setLanguage(dto);
-            }
-            return context.getDestination();
-        });
+        modelMapper.typeMap(Language.class, LanguageDTO.class)
+                .addMapping(Language::getLanguageId, LanguageDTO::setId);
+        modelMapper.typeMap(Film.class, FilmDTO.class)
+                .addMapping(Film::getLanguageByLanguageId, FilmDTO::setLanguage);
 
         return modelMapper;
     }
