@@ -60,7 +60,10 @@ public class ActorRestControllerTest extends AbstractIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.filmId", is(1)))
                 .andExpect(jsonPath("$.title", is("ACADEMY DINOSAUR")))
-                .andExpect(jsonPath("$.releaseYear", is(2006)));
+                .andExpect(jsonPath("$.releaseYear", is(2006)))
+                // language was silently null here until the Film -> FilmDTO post-converter
+                // was added; only the paged /films endpoint populated it.
+                .andExpect(jsonPath("$.language.name", is("English")));
     }
 
     @Test
@@ -74,7 +77,8 @@ public class ActorRestControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/actors/" + actorId + "/films"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(24)));
+                .andExpect(jsonPath("$", hasSize(24)))
+                .andExpect(jsonPath("$[0].language.name", is("English")));
     }
 
     @Test
