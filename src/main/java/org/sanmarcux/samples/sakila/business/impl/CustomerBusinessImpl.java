@@ -68,13 +68,16 @@ public class CustomerBusinessImpl implements CustomerBusiness {
 
         Customer c = modelMapper.map(payload, Customer.class);
 
-        Store s = new Store();
-        s.setStoreId(2);
-        c.setStore(s);
+        // Both are @NotNull on CustomerDTO, so @Valid has already rejected a payload that
+        // omits them. Resolve rather than trust: a client-supplied id that does not exist
+        // would otherwise fail late, as a foreign key violation.
+        Store store = storeRepository.findById(payload.getStore().getStoreId())
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
+        c.setStore(store);
 
-        Address a = new Address();
-        a.setAddressId(591);
-        c.setAddress(a);
+        Address address = addressRepository.findById(payload.getAddress().getAddressId())
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
+        c.setAddress(address);
 
         LocalDateTime now = LocalDateTime.now();
         c.setCreateDate(now);

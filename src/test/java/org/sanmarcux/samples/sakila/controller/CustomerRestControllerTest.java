@@ -61,6 +61,34 @@ public class CustomerRestControllerTest extends AbstractIntegrationTest {
     }
 
     /**
+     * save() used to discard the payload and hardcode store 2 / address 591, so every
+     * customer landed in the same store no matter what the client asked for.
+     */
+    @Test
+    public void createCustomerHonoursPayloadStoreAndAddress() throws Exception {
+        this.mockMvc.perform(post("/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(buildCustomer())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.store.storeId", is(1)))
+                .andExpect(jsonPath("$.address.addressId", is(1)));
+    }
+
+    /**
+     * A store id that does not exist is a 404, not a late foreign key violation.
+     */
+    @Test
+    public void createCustomerWithUnknownStore() throws Exception {
+        CustomerDTO customer = buildCustomer();
+        customer.getStore().setStoreId(9999);
+
+        this.mockMvc.perform(post("/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(customer)))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
      * CustomerDTO.store is @NotNull, so @Valid on newCustomer must reject this before the
      * business layer ever sees it. Same for a null address, or either nested id.
      */
@@ -87,20 +115,18 @@ public class CustomerRestControllerTest extends AbstractIntegrationTest {
     }
 
     /**
-     * Characterization test, not an endorsement: replaceCustomer() answers
-     * ResponseEntity.created(), so a PUT that updates an existing row reports 201 where
-     * REST says 200. Pinned so the day it is fixed this fails and says why, instead of
-     * the change going unnoticed.
+     * A PUT that replaces an existing customer answers 200. It used to answer 201, which
+     * is for creation only.
      */
     @Test
-    public void replaceCustomerReturns201() throws Exception {
+    public void replaceCustomerReturns200() throws Exception {
         CustomerDTO customer = buildCustomer();
         customer.setLastName("REPLACED");
 
         this.mockMvc.perform(put("/customers/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(customer)))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.lastName", is("REPLACED")));
     }
 

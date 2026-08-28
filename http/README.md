@@ -119,22 +119,27 @@ than #6, the fix has been reverted.
 
 ---
 
-## 5. Known bugs, pinned on purpose
+## 5. Bugs these files used to pin — now fixed
 
-Four assertions are **characterization tests**: they assert current, wrong behaviour so
-that fixing it fails the suite loudly instead of silently changing the contract. Each is
-commented in place. If one of these goes red, read the message — it is telling you
-something got fixed, and the assertion should then be deleted.
+The suite carried four **characterization tests**: assertions of current, wrong behaviour,
+written so that fixing the bug failed the suite loudly instead of silently changing the
+contract. All four have now been fixed, and each assertion was rewritten to demand the
+correct behaviour instead.
 
-| Where | Pinned behaviour | Correct behaviour |
+| Where | Was | Now |
 |---|---|---|
-| `actors.http` | PATCH maps to a fresh entity, nulling omitted fields (500 on partial payloads) | true partial update |
-| `customers.http` | `save()` ignores payload `store`/`address`, hardcodes 2 / 591 | honour the payload |
-| `customers.http` | PUT returns 201 | 200 |
-| `films.http` | `film_id > 32767` → 500 (`Film.filmId` is `Short`, repo is typed `Integer`) | 404 |
+| `actors.http` | PATCH mapped to a fresh entity, nulling omitted fields (500 on partial payloads) | true partial update, omitted fields preserved |
+| `customers.http` | `save()` ignored payload `store`/`address`, hardcoded 2 / 591 | payload honoured, unknown ids give 404 |
+| `customers.http` | PUT returned 201 | 200 |
+| `films.http` | `film_id > 32767` → 500 (`Film.filmId` was `Short`, repo typed `Integer`) | 404, entity is `Integer` |
 
-The `Film.filmId` one is the same class of bug as `Staff.staffId`, which was `Byte`
-against a `TINYINT UNSIGNED` column and is now `Integer`.
+The `Film.filmId` one was the same class of bug as `Staff.staffId`, which was `Byte`
+against a `TINYINT UNSIGNED` column and is also now `Integer`.
+
+Each fix is covered by a JUnit test as well, so the regression is caught by
+`mvn verify` and not only by running these files by hand. The pattern is worth keeping:
+when you find behaviour you cannot fix immediately, pin it with an assertion that fails
+on the day it changes.
 
 ---
 

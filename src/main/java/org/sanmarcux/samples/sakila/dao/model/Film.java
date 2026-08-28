@@ -23,7 +23,10 @@ public class Film implements java.io.Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-    private Short filmId;
+    // film_id is SMALLINT UNSIGNED (0-65535); Short tops out at 32767, and FilmRepository
+    // is typed JpaRepository<Film, Integer>, so any id above 32767 blew up converting the
+    // Integer argument into the entity's Short identifier -- a 500 where a 404 belongs.
+    private Integer filmId;
     private Language languageByOriginalLanguageId;
     private Language languageByLanguageId;
     private String title;
@@ -81,11 +84,11 @@ public class Film implements java.io.Serializable {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "film_id", unique = true, nullable = false)
-    public Short getFilmId() {
+    public Integer getFilmId() {
         return this.filmId;
     }
 
-    public void setFilmId(Short filmId) {
+    public void setFilmId(Integer filmId) {
         this.filmId = filmId;
     }
 
