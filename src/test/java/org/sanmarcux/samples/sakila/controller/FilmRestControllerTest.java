@@ -78,7 +78,11 @@ public class FilmRestControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.filmId", is(1)))
-                .andExpect(jsonPath("$.title", is("ACADEMY DINOSAUR")));
+                .andExpect(jsonPath("$.title", is("ACADEMY DINOSAUR")))
+                // readFilms above asserted this on the paged endpoint, which populated the
+                // language by hand; the single-film path returned null until the shared
+                // Film -> FilmDTO post-converter took over.
+                .andExpect(jsonPath("$.language.name", is("English")));
     }
 
     @Test

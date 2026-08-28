@@ -39,7 +39,7 @@
     <properties>
         <java.version>21</java.version>
 
-        <modelmapper.version>2.3.0</modelmapper.version>
+        <modelmapper.version>3.2.6</modelmapper.version>
     </properties>
 
     <dependencies>

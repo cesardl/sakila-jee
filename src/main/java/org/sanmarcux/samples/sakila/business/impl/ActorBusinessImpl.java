@@ -107,7 +107,7 @@ public class ActorBusinessImpl implements ActorBusiness {
 
     @Override
     public FilmDTO getFilm(final Integer actorId, final Integer filmId) {
-        return filmActorRepository.findById(new FilmActorId(actorId, filmId))
+        return filmActorRepository.findByIdFetchingFilm(new FilmActorId(actorId, filmId))
                 .map(filmActor -> modelMapper.map(filmActor.getFilm(), FilmDTO.class))
                 .orElseThrow(() -> new OperationNotAllowedException("The actor doesn't participate in film"));
     }

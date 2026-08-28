@@ -53,7 +53,9 @@ public class FilmActor implements java.io.Serializable {
         this.actor = actor;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    // LAZY: only ActorBusinessImpl.getFilm() needs the film, and it asks for it explicitly
+    // through FilmActorRepository.findByIdFetchingFilm.
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "film_id", nullable = false, insertable = false, updatable = false)
     public Film getFilm() {
         return this.film;
