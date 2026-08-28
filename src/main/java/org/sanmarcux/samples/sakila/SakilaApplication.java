@@ -21,4 +21,8 @@ public class SakilaApplication {
                 .setMatchingStrategy(MatchingStrategies.STRICT);
         return modelMapper;
     }
+
+    // CORS now lives in WebSecurityConfiguration#corsConfigurationSource. A hand-rolled
+    // FilterRegistrationBean sits outside the security chain, so its ordering relative to
+    // AuthorizationFilter is not guaranteed and it stamps CORS headers onto 401s too.
 }

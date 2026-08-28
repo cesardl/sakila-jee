@@ -1,0 +1,61 @@
+### Creating a film -- READ THIS FIRST.
+#
+# FilmRestController exposes no DELETE, so nothing here can be undone through the API.
+# This is where the extra rows in the dev database came from: 1008 films instead of the
+# 1000 that stock sakila-data.sql ships.
+#
+# Kept in its own file precisely so that running all of films.http stays harmless.
+# After running this, clean up in SQL:
+#
+#   DELETE FROM film_text WHERE title LIKE 'HTTPCLIENT PROBE%';
+#   DELETE FROM film      WHERE title LIKE 'HTTPCLIENT PROBE%';
+#
+# The lasting fix is a DELETE /films/{id} endpoint, not discipline.
+
+### Log in.
+# @name login
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{"username": "{{username}}", "password": "{{password}}"}
+
+> ./save-token.js
+
+### Create a film. Writes a permanent row.
+POST {{host}}/films
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "title": "HTTPCLIENT PROBE {{$timestamp}}",
+  "description": "Created from http/films-write.http - safe to delete",
+  "releaseYear": 1999,
+  "language": {"id": 1},
+  "rentalRate": 0.99,
+  "replacementCost": 20.99,
+  "rating": "GENERAL_AUDIENCES"
+}
+
+> {%
+    client.test("201 with a Location header", function () {
+        client.assert(response.status === 201, "expected 201, got " + response.status);
+    });
+
+    var location = String(response.headers.valueOf("Location"));
+    client.global.set("new_film_url", location);
+    client.log("Created " + location + " - no DELETE endpoint exists, remove it in SQL.");
+%}
+
+### Read it back, so the run proves the row exists rather than just that the POST returned.
+GET {{new_film_url}}
+Authorization: Bearer {{auth_token}}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.test("the created film is readable", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(body.title.indexOf("HTTPCLIENT PROBE") === 0,
+            "wrong row at the Location URL");
+    });
+%}

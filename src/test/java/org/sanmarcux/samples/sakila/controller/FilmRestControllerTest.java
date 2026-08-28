@@ -1,6 +1,7 @@
 package org.sanmarcux.samples.sakila.controller;
 
 import org.junit.jupiter.api.Test;
+import org.sanmarcux.samples.sakila.AbstractIntegrationTest;
 import org.sanmarcux.samples.sakila.SakilaApplication;
 import org.sanmarcux.samples.sakila.dao.model.Rating;
 import org.sanmarcux.samples.sakila.dto.FilmDTO;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -28,7 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(classes = SakilaApplication.class)
 @AutoConfigureMockMvc
-public class FilmRestControllerTest {
+@WithMockUser // these assert resource behaviour, not authentication; see AuthRestControllerTest
+public class FilmRestControllerTest extends AbstractIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

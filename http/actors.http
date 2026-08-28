@@ -1,0 +1,224 @@
+### Actors. Self-contained: logs in first, so it can be run on its own.
+
+### Log in.
+# @name login
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{"username": "{{username}}", "password": "{{password}}"}
+
+> ./save-token.js
+
+### Page of actors. Asserts fixture rows, so a wrong/empty database fails loudly
+# instead of returning a plausible-looking empty page.
+GET {{host}}/actors?page=0&size=2
+Authorization: Bearer {{auth_token}}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.test("200 JSON", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(response.contentType.mimeType === "application/json", "expected JSON");
+    });
+
+    client.test("page is honoured", function () {
+        client.assert(body.content.length === 2,
+            "expected 2 rows, got " + body.content.length);
+        client.assert(body.totalElements >= 200,
+            "expected the full sakila dump (200+ actors), got " + body.totalElements);
+    });
+
+    client.test("actor 1 is PENELOPE GUINESS", function () {
+        var first = body.content[0];
+        client.assert(first.actorId === 1 && first.firstName === "PENELOPE" && first.lastName === "GUINESS",
+            "unexpected first row: " + JSON.stringify(first));
+    });
+%}
+
+### Single actor.
+GET {{host}}/actors/1
+Authorization: Bearer {{auth_token}}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.test("200 with actor 1", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(body.actorId === 1, "wrong actor returned");
+    });
+%}
+
+### Unknown actor -> 404.
+GET {{host}}/actors/999999
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("404 for an unknown actor", function () {
+        client.assert(response.status === 404, "expected 404, got " + response.status);
+    });
+%}
+
+### Films an actor appears in.
+GET {{host}}/actors/100/films
+Authorization: Bearer {{auth_token}}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.test("actor 100 has 24 films", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(body.length === 24,
+            "expected 24 films, got " + body.length);
+    });
+%}
+
+### One film of one actor.
+GET {{host}}/actors/1/films/1
+Authorization: Bearer {{auth_token}}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.test("200 ACADEMY DINOSAUR", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(body.title === "ACADEMY DINOSAUR", "wrong film");
+    });
+%}
+
+### An actor who is not in that film -> 400.
+GET {{host}}/actors/100/films/10
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("400 when the actor is not in the film", function () {
+        client.assert(response.status === 400, "expected 400, got " + response.status);
+    });
+%}
+
+### ---------------------------------------------------------------------------
+### Write lifecycle: create -> read -> replace -> delete -> gone.
+### Self-cleaning on purpose. This is what keeps the dev database from drifting
+### the way it already has (1008 films instead of 1000).
+### ---------------------------------------------------------------------------
+
+### Create. The timestamp keeps re-runs from piling up identical rows.
+# @name createActor
+POST {{host}}/actors
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{"firstName": "HTTPCLIENT", "lastName": "PROBE {{$timestamp}}"}
+
+> {%
+    client.test("201 with a Location header", function () {
+        client.assert(response.status === 201, "expected 201, got " + response.status);
+    });
+
+    var location = String(response.headers.valueOf("Location"));
+    client.assert(location.length > 0, "no Location header to follow");
+    client.global.set("new_actor_url", location);
+%}
+
+### Follow the Location header. Proves the row is really there, which a bare
+# "201 Created" assertion does not.
+GET {{new_actor_url}}
+Authorization: Bearer {{auth_token}}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.test("the created actor is readable", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(body.firstName === "HTTPCLIENT", "wrong row at the Location URL");
+    });
+%}
+
+### Update.
+#
+# NOTE: this is mapped as PATCH but behaves as PUT. ActorBusinessImpl.modify maps the
+# payload into a *fresh* Actor and saves it, so any field you omit is written as NULL.
+# Sending only {"lastName": "..."} nulls first_name, which is NOT NULL in Sakila, and
+# you get a 500. Hence the full body below.
+PATCH {{new_actor_url}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{"firstName": "HTTPCLIENT", "lastName": "PATCHED"}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.test("200 and the change stuck", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(body.lastName === "PATCHED", "lastName was not updated");
+    });
+%}
+
+### Partial PATCH -> 500. Characterization test for the bug described above:
+# this SHOULD be a 200 (or a 400), and it will fail here the day modify() is fixed
+# to merge onto the managed entity. That failure is the signal to delete this request.
+PATCH {{new_actor_url}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{"lastName": "PARTIAL"}
+
+> {%
+    client.test("KNOWN BUG: a partial PATCH nulls the other columns and 500s", function () {
+        client.assert(response.status === 500,
+            "modify() looks fixed (got " + response.status + ") - drop this request and the note above it");
+    });
+%}
+
+### Delete.
+DELETE {{new_actor_url}}
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("200 on delete", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+    });
+%}
+
+### ...and it is gone. Also the cleanup check: if this is not a 404, the file left
+# a row behind.
+GET {{new_actor_url}}
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("404 after delete", function () {
+        client.assert(response.status === 404,
+            "the probe row survived - clean it up before it becomes permanent drift");
+    });
+%}
+
+### ---------------------------------------------------------------------------
+### Payload rejection
+### ---------------------------------------------------------------------------
+
+### Client-supplied id on create -> 400.
+POST {{host}}/actors
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{"actorId": 1, "firstName": "X", "lastName": "Y"}
+
+> {%
+    client.test("400 when the payload sets an id", function () {
+        client.assert(response.status === 400, "expected 400, got " + response.status);
+    });
+%}
+
+### Missing required field -> 400.
+POST {{host}}/actors
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{"firstName": "X"}
+
+> {%
+    client.test("400 when lastName is missing", function () {
+        client.assert(response.status === 400, "expected 400, got " + response.status);
+    });
+%}

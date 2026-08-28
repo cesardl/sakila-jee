@@ -1,5 +1,6 @@
 package org.sanmarcux.samples.sakila.controller;
 
+import jakarta.validation.Valid;
 import org.sanmarcux.samples.sakila.business.ActorBusiness;
 import org.sanmarcux.samples.sakila.business.FilmBusiness;
 import org.sanmarcux.samples.sakila.dto.ActorDTO;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -46,6 +46,7 @@ public class ActorRestController {
     @ResponseBody
     public ResponseEntity<Page<ActorDTO>> listActors(final Pageable pageable) {
         LOG.info("Invoking Rest Service listActors");
+
         Page<ActorDTO> actors = actorBusiness.list(pageable);
 
         if (actors.hasContent()) {

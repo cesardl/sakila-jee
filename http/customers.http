@@ -1,0 +1,192 @@
+### Customers. The only HATEOAS resource in the API - the assertions here are about
+### the links, since that is what the Vue client will navigate by.
+
+### Log in.
+# @name login
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{"username": "{{username}}", "password": "{{password}}"}
+
+> ./save-token.js
+
+### Collection. Note this is CollectionModel, not Page: no paging, all 599 rows.
+GET {{host}}/customers
+Authorization: Bearer {{auth_token}}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.test("200 JSON", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+    });
+
+    client.test("_embedded collection is present", function () {
+        client.assert(body._embedded !== undefined, "no _embedded in the response");
+        client.assert(body._embedded.customerDTOList.length > 0, "empty collection");
+    });
+
+    client.test("every item carries a self link", function () {
+        var first = body._embedded.customerDTOList[0];
+        client.assert(first._links.self.href.indexOf("/customers/" + first.customerId) > 0,
+            "self link does not point at the item: " + first._links.self.href);
+    });
+
+    // Unpaged: the whole table is serialised on every call. Fine at 599 rows, worth
+    // remembering before this endpoint is put in front of anything real.
+    var count = body._embedded.customerDTOList.length;
+    if (count !== 599) {
+        client.log("WARNING: " + count + " customers, expected 599. "
+            + (count - 599) + " leftover row(s) from past create runs.");
+    }
+%}
+
+### Single customer, reached by id.
+GET {{host}}/customers/1
+Authorization: Bearer {{auth_token}}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+
+    client.test("200 MARY SMITH", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(body.firstName === "MARY", "wrong customer");
+    });
+
+    client.test("self and collection links", function () {
+        client.assert(body._links.self !== undefined, "no self link");
+        client.assert(body._links.customers !== undefined, "no collection link");
+    });
+%}
+
+### Unknown customer -> 404.
+GET {{host}}/customers/999999
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("404 for an unknown customer", function () {
+        client.assert(response.status === 404, "expected 404, got " + response.status);
+    });
+%}
+
+### ---------------------------------------------------------------------------
+### Write lifecycle: create -> read -> replace -> delete -> gone. Self-cleaning.
+### ---------------------------------------------------------------------------
+
+### Create. Deliberately sends store 1 / address 5 - see the assertion below.
+# @name createCustomer
+POST {{host}}/customers
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "firstName": "HTTPCLIENT",
+  "lastName": "PROBE",
+  "email": "httpclient.probe@sakilacustomer.org",
+  "store": {"storeId": 1},
+  "address": {"addressId": 5}
+}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+
+    client.test("201 with a self link", function () {
+        client.assert(response.status === 201, "expected 201, got " + response.status);
+        client.assert(body._links.self.href.length > 0, "no self link in the body");
+    });
+
+    // Characterization test, not an endorsement: CustomerBusinessImpl.save() throws away
+    // the store and address from the payload and hardcodes 2 and 591. Pinned here so the
+    // day that is fixed, this fails and tells you why instead of going unnoticed.
+    client.test("KNOWN BUG: store/address from the payload are ignored", function () {
+        client.assert(body.store.storeId === 2 && body.address.addressId === 591,
+            "save() looks fixed (store " + body.store.storeId
+            + ", address " + body.address.addressId
+            + ") - drop this assertion and the note above it");
+    });
+
+    client.global.set("new_customer_url", body._links.self.href);
+%}
+
+### Follow the self link.
+GET {{new_customer_url}}
+Authorization: Bearer {{auth_token}}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.test("the created customer is readable", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+        client.assert(body.firstName === "HTTPCLIENT", "wrong row at the self link");
+    });
+%}
+
+### Replace. Unlike actors, this one merges onto the managed entity, so it is a real PUT.
+PUT {{new_customer_url}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "firstName": "HTTPCLIENT",
+  "lastName": "REPLACED",
+  "email": "httpclient.probe@sakilacustomer.org",
+  "store": {"storeId": 1},
+  "address": {"addressId": 5}
+}
+
+> {%
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.test("the change stuck", function () {
+        client.assert(body.lastName === "REPLACED", "lastName was not updated");
+    });
+
+    // Characterization test: replaceCustomer() answers ResponseEntity.created(), so an
+    // update of an existing resource reports 201. Should be 200.
+    client.test("KNOWN BUG: update returns 201 instead of 200", function () {
+        client.assert(response.status === 201,
+            "replaceCustomer looks fixed (got " + response.status + ") - drop this assertion");
+    });
+%}
+
+### Delete.
+DELETE {{new_customer_url}}
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("204 on delete", function () {
+        client.assert(response.status === 204, "expected 204, got " + response.status);
+    });
+%}
+
+### ...and it is gone. Cleanup check.
+GET {{new_customer_url}}
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("404 after delete", function () {
+        client.assert(response.status === 404,
+            "the probe row survived - clean it up before it becomes permanent drift");
+    });
+%}
+
+### Client-supplied id on create -> 400.
+POST {{host}}/customers
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "firstName": "X",
+  "lastName": "Y",
+  "store": {"storeId": 1},
+  "address": {"addressId": 5}
+}
+
+> {%
+    client.test("400 when the payload sets an id", function () {
+        client.assert(response.status === 400, "expected 400, got " + response.status);
+    });
+%}

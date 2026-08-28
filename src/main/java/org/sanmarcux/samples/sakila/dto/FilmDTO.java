@@ -1,9 +1,9 @@
 package org.sanmarcux.samples.sakila.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.sanmarcux.samples.sakila.dao.model.Rating;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Year;
 

@@ -5,7 +5,7 @@ package org.sanmarcux.samples.sakila.dao.model;
 import jakarta.persistence.*;
 
 import java.io.Serial;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -26,8 +26,8 @@ public class Customer implements java.io.Serializable {
     private String lastName;
     private String email;
     private boolean active;
-    private Date createDate;
-    private Date lastUpdate;
+    private LocalDateTime createDate;
+    private LocalDateTime lastUpdate;
     private List<Rental> rentals;
     private List<Payment> payments;
 
@@ -35,7 +35,7 @@ public class Customer implements java.io.Serializable {
     }
 
     public Customer(Address address, Store store, String firstName,
-                    String lastName, boolean active, Date createDate, Date lastUpdate) {
+                    String lastName, boolean active, LocalDateTime createDate, LocalDateTime lastUpdate) {
         this.address = address;
         this.store = store;
         this.firstName = firstName;
@@ -46,8 +46,8 @@ public class Customer implements java.io.Serializable {
     }
 
     public Customer(Address address, Store store, String firstName,
-                    String lastName, String email, boolean active, Date createDate,
-                    Date lastUpdate, List<Rental> rentals, List<Payment> payments) {
+                    String lastName, String email, boolean active, LocalDateTime createDate,
+                    LocalDateTime lastUpdate, List<Rental> rentals, List<Payment> payments) {
         this.address = address;
         this.store = store;
         this.firstName = firstName;
@@ -127,21 +127,21 @@ public class Customer implements java.io.Serializable {
         this.active = active;
     }
 
-    @Column(name = "create_date", nullable = false, length = 19)
-    public Date getCreateDate() {
+    @Column(name = "create_date", nullable = false)
+    public LocalDateTime getCreateDate() {
         return this.createDate;
     }
 
-    public void setCreateDate(Date createDate) {
+    public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
     }
 
-    @Column(name = "last_update", nullable = false, length = 19)
-    public Date getLastUpdate() {
+    @Column(name = "last_update", nullable = false)
+    public LocalDateTime getLastUpdate() {
         return this.lastUpdate;
     }
 
-    public void setLastUpdate(Date lastUpdate) {
+    public void setLastUpdate(LocalDateTime lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 

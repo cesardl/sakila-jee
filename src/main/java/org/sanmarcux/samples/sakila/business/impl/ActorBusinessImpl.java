@@ -17,7 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 /**
@@ -90,7 +90,7 @@ public class ActorBusinessImpl implements ActorBusiness {
     public void createFilmParticipation(final Integer actorId, final Integer filmId) {
         FilmActor filmActor = new FilmActor();
         filmActor.setId(new FilmActorId(actorId, filmId));
-        filmActor.setLastUpdate(new Date());
+        filmActor.setLastUpdate(LocalDateTime.now());
         filmActorRepository.save(filmActor);
     }
 

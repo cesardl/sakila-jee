@@ -1,5 +1,6 @@
 package org.sanmarcux.samples.sakila.controller;
 
+import jakarta.validation.Valid;
 import org.sanmarcux.samples.sakila.business.CustomerBusiness;
 import org.sanmarcux.samples.sakila.dto.CustomerDTO;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class CustomerRestController {
     // end::get-aggregate-root[]
 
     @PostMapping()
-    public ResponseEntity<?> newCustomer(@RequestBody CustomerDTO newCustomer) {
+    public ResponseEntity<?> newCustomer(@Valid @RequestBody CustomerDTO newCustomer) {
         LOG.info("Invoking Rest Service createCustomer");
 
         EntityModel<CustomerDTO> entityModel = business.save(newCustomer);
@@ -55,7 +56,7 @@ public class CustomerRestController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> replaceCustomer(@RequestBody CustomerDTO newCustomer, @PathVariable Integer id) {
+    public ResponseEntity<?> replaceCustomer(@Valid @RequestBody CustomerDTO newCustomer, @PathVariable Integer id) {
         LOG.info("Invoking Rest Service modifyCustomer");
 
         EntityModel<CustomerDTO> entityModel = business.modify(id, newCustomer);
