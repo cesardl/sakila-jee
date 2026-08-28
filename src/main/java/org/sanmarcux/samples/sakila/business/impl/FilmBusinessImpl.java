@@ -7,7 +7,6 @@ import org.sanmarcux.samples.sakila.dao.LanguageRepository;
 import org.sanmarcux.samples.sakila.dao.model.Film;
 import org.sanmarcux.samples.sakila.dao.model.Language;
 import org.sanmarcux.samples.sakila.dto.FilmDTO;
-import org.sanmarcux.samples.sakila.dto.LanguageDTO;
 import org.sanmarcux.samples.sakila.exceptions.FilmNotFoundException;
 import org.sanmarcux.samples.sakila.exceptions.LanguageNotFoundException;
 import org.sanmarcux.samples.sakila.exceptions.OperationNotAllowedException;
@@ -48,15 +47,7 @@ public class FilmBusinessImpl implements FilmBusiness {
 
         return new PageImpl<>(
                 films.stream()
-                        .map(film -> {
-                            LanguageDTO l = new LanguageDTO();
-                            l.setId(film.getLanguageByLanguageId().getLanguageId());
-                            l.setName(film.getLanguageByLanguageId().getName());
-
-                            FilmDTO f = modelMapper.map(film, FilmDTO.class);
-                            f.setLanguage(l);
-                            return f;
-                        })
+                        .map(film -> modelMapper.map(film, FilmDTO.class))
                         .collect(Collectors.toList()),
                 films.getPageable(), films.getTotalElements());
     }

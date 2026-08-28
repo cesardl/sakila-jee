@@ -34,7 +34,11 @@ public class Actor implements java.io.Serializable {
     @Column(name = "last_update", nullable = false, length = 19)
     private Date lastUpdate;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "actor")
+    // LAZY, not EAGER: ActorDTO exposes only id/firstName/lastName, so eager-loading this
+    // meant one extra query per actor on every page of /actors (film_actor joined to film
+    // and language), hydrating full film rows that the mapping then threw away.
+    // /actors/{id}/films does not read this -- it goes through FilmRepository.findAllByActor.
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "actor")
     private List<FilmActor> filmActors;
 
     public Actor() {
