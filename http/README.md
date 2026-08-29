@@ -20,7 +20,7 @@ $env:JAVA_HOME = "C:\Program Files\Java\jdk-21"   # shell JAVA_HOME points at 11
 $env:JWT_SECRET = "<at least 32 bytes>"           # no default; app will not start without it
 ```
 
-Dev DB (MySQL 5.7 on `3310`) must be up and seeded, in this order:
+Dev DB (MySQL 8.0 on `3312`) must be up and seeded, in this order:
 `sakila-schema.sql` → `sakila-data.sql` → `auth-fixture.sql`.
 
 > **Re-run `auth-fixture.sql` before using this suite.** It now seeds a `disabled`
@@ -39,7 +39,7 @@ missing, copy the shape from `http-client.env.json` and add `username`/`password
 mvn clean verify
 ```
 
-28 tests, Testcontainers pulls `mysql:5.7.44` and seeds it from `database-model/`.
+33 tests, Testcontainers pulls `mysql:8.0.46` and seeds it from `database-model/`.
 Docker must be running. If this is red, do not bother with the `.http` files.
 
 ## 2. Start the app
@@ -146,7 +146,7 @@ on the day it changes.
 ## 6. Database drift
 
 `films.http` and `customers.http` log a WARNING (not a failure) when row counts drift
-from the stock dump. Current state of the dev DB on 3310:
+from the stock dump. Current state of the dev DB on 3312:
 
 | Table | Expected | Actual | Drift |
 |---|---|---|---|

@@ -11,14 +11,19 @@ Spring Boot 4 / Java 21 REST backend over the MySQL "Sakila" sample database (fi
 The app expects a MySQL instance with the Sakila schema loaded. Local dev via Docker:
 
 ```
-docker run --name sakila-db -p 3314:3306 --restart on-failure -e MYSQL_DATABASE=sakila -e MYSQL_ROOT_PASSWORD=rootroot -e MYSQL_USER=travis -e MYSQL_PASSWORD=my-secret-pw -e TZ='America/Lima' -d mysql --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --log_bin_trust_function_creators=1
+docker run --name sakila-db -p 3312:3306 --restart on-failure -e MYSQL_DATABASE=sakila -e MYSQL_ROOT_PASSWORD=rootroot -e MYSQL_USER=travis -e MYSQL_PASSWORD=my-secret-pw -e TZ='America/Lima' -d mysql:8.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --log_bin_trust_function_creators=1
 ```
+
+Pin the image to `mysql:8.0` and keep the Testcontainer on the same major version.
+`explicit_defaults_for_timestamp` flipped from `0` to `1` in MySQL 8.0.2, so a `TIMESTAMP NOT NULL`
+column that 5.7 quietly filled from `CURRENT_TIMESTAMP` on an explicit `NULL` now rejects the
+insert. Any entity mapping such a column needs `insertable = false` — see `Actor`/`Film`.
 
 Load `database-model/` scripts **in this order** — `sakila-schema.sql`, then `sakila-data.sql`, then `auth-fixture.sql`. The first two are vendored from Oracle (own copyright header) — don't edit them; put schema changes in `auth-fixture.sql` or a new script. `sakila.mwb` is the MySQL Workbench model, kept in sync manually.
 
 `auth-fixture.sql` replaced the old `data.sql`, which was a Travis-era minimal extraction whose rows now collide with the full dump.
 
-Dev DB is `jdbc:mysql://localhost:3310/sakila`. App runs on `8181`; actuator on `127.0.0.1:8182`.
+Dev DB is `jdbc:mysql://localhost:3312/sakila` (MySQL 8.0). App runs on `8181`; actuator on `127.0.0.1:8182`.
 
 ## Common commands
 
@@ -81,7 +86,7 @@ Boot 4 / Security 7 gotchas already hit and solved here — don't reintroduce th
 
 ## Tests
 
-`mvn clean verify` — tests start a throwaway `mysql:5.7.44` Testcontainer seeded from `database-model/` (`AbstractIntegrationTest`), so they never touch the local dev DB. Docker must be running.
+`mvn clean verify` — tests start a throwaway `mysql:8.0.46` Testcontainer seeded from `database-model/` (`AbstractIntegrationTest`), so they never touch the local dev DB. Docker must be running.
 
 - The container is a **static field**, not a `@Bean`: Spring caches one context per distinct test configuration, and a bean would reload the 3.4MB dump per context.
 - Init scripts run in **alphabetical** order inside the container, hence the `01-`/`02-`/`03-` prefixes.

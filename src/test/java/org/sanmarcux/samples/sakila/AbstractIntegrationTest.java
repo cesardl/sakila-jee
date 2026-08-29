@@ -24,7 +24,7 @@ public abstract class AbstractIntegrationTest {
 
     // Pinned to the same 5.7 the local docker instance runs, so tests cannot silently
     // drift onto a different server version.
-    private static final MySQLContainer MYSQL = new MySQLContainer("mysql:5.7.44")
+    private static final MySQLContainer MYSQL = new MySQLContainer("mysql:8.0.46")
             .withDatabaseName("sakila")
             // Same server flags as the docker run line in README.md, so tests and local
             // development exercise the same server configuration. The schema creates stored
