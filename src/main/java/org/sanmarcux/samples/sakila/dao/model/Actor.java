@@ -31,7 +31,12 @@ public class Actor implements java.io.Serializable {
     @Column(name = "last_name", nullable = false, length = 45)
     private String lastName;
 
-    @Column(name = "last_update", nullable = false, length = 19)
+    // insertable = false, as on Film.lastUpdate: the column is
+    // "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP", so the
+    // database fills it. Leaving it insertable made create() send an explicit NULL, which
+    // MySQL 5.7 silently rewrote to CURRENT_TIMESTAMP but MySQL 8 rejects outright:
+    // explicit_defaults_for_timestamp flipped from 0 to 1 in 8.0.2.
+    @Column(name = "last_update", nullable = false, insertable = false, length = 19)
     private Date lastUpdate;
 
     // LAZY, not EAGER: ActorDTO exposes only id/firstName/lastName, so eager-loading this

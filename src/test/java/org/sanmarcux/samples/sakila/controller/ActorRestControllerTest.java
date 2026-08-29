@@ -54,6 +54,33 @@ public class ActorRestControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    /**
+     * Creating an actor had no test of its own -- it was only ever exercised as a side
+     * effect of the PATCH test. It also never sets last_update, which MySQL 5.7 quietly
+     * filled in and MySQL 8 rejects, so this is the case that broke against a real 8.0
+     * server while the 5.7 test container stayed green.
+     */
+    @Test
+    public void createActor() throws Exception {
+        ActorDTO payload = new ActorDTO();
+        payload.setFirstName("CREATED");
+        payload.setLastName("BYTEST");
+
+        String location = this.mockMvc.perform(post("/actors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(payload)))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"))
+                .andReturn().getResponse().getHeader("Location");
+
+        this.mockMvc.perform(get(location))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName", is("CREATED")))
+                .andExpect(jsonPath("$.lastName", is("BYTEST")));
+
+        this.mockMvc.perform(delete(location)).andExpect(status().isOk());
+    }
+
     @Test
     public void readSingleFilm() throws Exception {
         mockMvc.perform(get("/actors/1/films/1"))
