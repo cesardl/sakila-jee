@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class FilmListId implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
-    private Short fid;
+    private Integer fid;
     private String title;
     private String description;
     private String category;
@@ -30,7 +30,7 @@ public class FilmListId implements java.io.Serializable {
         this.category = category;
     }
 
-    public FilmListId(Short fid, String title, String description,
+    public FilmListId(Integer fid, String title, String description,
                       String category, BigDecimal price, Short length, String rating,
                       String actors) {
         this.fid = fid;
@@ -44,11 +44,11 @@ public class FilmListId implements java.io.Serializable {
     }
 
     @Column(name = "FID")
-    public Short getFid() {
+    public Integer getFid() {
         return this.fid;
     }
 
-    public void setFid(Short fid) {
+    public void setFid(Integer fid) {
         this.fid = fid;
     }
 

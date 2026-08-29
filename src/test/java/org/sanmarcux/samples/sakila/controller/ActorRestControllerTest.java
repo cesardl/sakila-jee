@@ -78,7 +78,7 @@ public class ActorRestControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.firstName", is("CREATED")))
                 .andExpect(jsonPath("$.lastName", is("BYTEST")));
 
-        this.mockMvc.perform(delete(location)).andExpect(status().isOk());
+        this.mockMvc.perform(delete(location)).andExpect(status().isNoContent());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class ActorRestControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(delete("/actors/" + actorId + "/films/3"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     /**
@@ -149,6 +149,6 @@ public class ActorRestControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.lastName", is("SUBJECT")));
 
-        this.mockMvc.perform(delete(location)).andExpect(status().isOk());
+        this.mockMvc.perform(delete(location)).andExpect(status().isNoContent());
     }
 }

@@ -22,19 +22,25 @@ import org.testcontainers.utility.MountableFile;
  */
 public abstract class AbstractIntegrationTest {
 
-    // Pinned to the same 5.7 the local docker instance runs, so tests cannot silently
-    // drift onto a different server version.
+    // Pinned to MySQL 8, the version the app requires. This is the one piece of the setup
+    // that is NOT free to vary: 8.0.2 flipped explicit_defaults_for_timestamp from 0 to 1,
+    // so a TIMESTAMP NOT NULL column that 5.7 quietly filled from CURRENT_TIMESTAMP now
+    // rejects an explicit NULL. Running these tests on 5.7 hid exactly that bug. Credentials
+    // and ports below are Testcontainers' own and deliberately arbitrary.
     private static final MySQLContainer MYSQL = new MySQLContainer("mysql:8.0.46")
             .withDatabaseName("sakila")
-            // Same server flags as the docker run line in README.md, so tests and local
-            // development exercise the same server configuration. The schema creates stored
-            // functions and triggers, which needs log_bin_trust_function_creators.
+            // Same server flags and timezone as the docker line in CLAUDE.md. Connector/J
+            // converts TIMESTAMP columns through the connection zone, so tests and local
+            // development have to agree or a timestamp bug only shows up in one of them.
+            // The schema creates stored functions and triggers, hence
+            // log_bin_trust_function_creators.
+            .withEnv("TZ", "America/Lima")
             .withCommand(
                     "--character-set-server=utf8mb4",
                     "--collation-server=utf8mb4_unicode_ci",
                     "--log_bin_trust_function_creators=1")
             .withUrlParam("useSSL", "false")
-            .withUrlParam("serverTimezone", "UTC")
+            .withUrlParam("serverTimezone", "America/Lima")
             // The MySQL image runs /docker-entrypoint-initdb.d/*.sql in ALPHABETICAL order,
             // and the natural filenames sort wrong (schema would run last). Hence prefixes.
             .withCopyFileToContainer(

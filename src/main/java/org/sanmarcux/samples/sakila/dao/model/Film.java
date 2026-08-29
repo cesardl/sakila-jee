@@ -196,7 +196,7 @@ public class Film implements java.io.Serializable {
         this.specialFeatures = specialFeatures;
     }
 
-    @Column(name = "last_update", nullable = false, insertable = false, length = 19)
+    @Column(name = "last_update", nullable = false, insertable = false, updatable = false)
     public Date getLastUpdate() {
         return this.lastUpdate;
     }

@@ -71,6 +71,13 @@ public class ActorBusinessImpl implements ActorBusiness {
     @Transactional
     @Override
     public ActorDTO modify(final Integer actorId, final ActorDTO payload) {
+        // An id in the body that disagrees with the URL is a client mistake, not something
+        // to silently discard. create() already rejects a client-supplied id; the two write
+        // paths should not disagree about that.
+        if (payload.getActorId() != null && !payload.getActorId().equals(actorId)) {
+            throw new OperationNotAllowedException("The actor id in the payload does not match the URL");
+        }
+
         // PATCH is a partial update, so merge onto the managed row instead of mapping the
         // payload onto a fresh Actor: that nulled every field the caller left out, which
         // wiped first_name/last_name and blew up on the NOT NULL last_update.
@@ -80,7 +87,6 @@ public class ActorBusinessImpl implements ActorBusiness {
 
         modelMapper.map(payload, actor);
         actor.setActorId(actorId);
-        actor.setLastUpdate(new Date());
 
         return modelMapper.map(actorRepository.save(actor), ActorDTO.class);
     }
@@ -101,7 +107,6 @@ public class ActorBusinessImpl implements ActorBusiness {
     public void createFilmParticipation(final Integer actorId, final Integer filmId) {
         FilmActor filmActor = new FilmActor();
         filmActor.setId(new FilmActorId(actorId, filmId));
-        filmActor.setLastUpdate(LocalDateTime.now());
         filmActorRepository.save(filmActor);
     }
 

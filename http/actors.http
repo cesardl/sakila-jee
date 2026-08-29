@@ -134,12 +134,7 @@ Authorization: Bearer {{auth_token}}
     });
 %}
 
-### Update.
-#
-# NOTE: this is mapped as PATCH but behaves as PUT. ActorBusinessImpl.modify maps the
-# payload into a *fresh* Actor and saves it, so any field you omit is written as NULL.
-# Sending only {"lastName": "..."} nulls first_name, which is NOT NULL in Sakila, and
-# you get a 500. Hence the full body below.
+### Update, full body. The partial case is the next request.
 PATCH {{new_actor_url}}
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
@@ -184,8 +179,8 @@ DELETE {{new_actor_url}}
 Authorization: Bearer {{auth_token}}
 
 > {%
-    client.test("200 on delete", function () {
-        client.assert(response.status === 200, "expected 200, got " + response.status);
+    client.test("204 on delete", function () {
+        client.assert(response.status === 204, "expected 204, got " + response.status);
     });
 %}
 
