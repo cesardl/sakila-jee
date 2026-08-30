@@ -19,20 +19,22 @@ already cost one live bug (`POST /actors`) that the 5.7 test container could not
 Testcontainer in `AbstractIntegrationTest` is pinned to 8 for exactly this reason — keep it and the
 dev server on the same major version.
 
-Local dev via Docker (port, user and password here are examples, not requirements):
+Local dev via Docker (port and credentials here are examples, not requirements):
 
 ```
-docker run --name sakila-db -p 3312:3306 --restart on-failure -e MYSQL_DATABASE=sakila -e MYSQL_ROOT_PASSWORD=rootroot -e MYSQL_USER=travis -e MYSQL_PASSWORD=my-secret-pw -e TZ='America/Lima' -d mysql:8.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --log_bin_trust_function_creators=1
+docker run --name sakila-db -p 3312:3306 --restart on-failure -e MYSQL_DATABASE=sakila -e MYSQL_ROOT_PASSWORD=rootroot -e TZ='America/Lima' -d mysql:8.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --log_bin_trust_function_creators=1
 ```
+
+Then load the scripts (below) and create the application account from the snippet at the top of
+`database-model/queries.sql`. The account is made there rather than through `MYSQL_USER`/
+`MYSQL_PASSWORD` because those env vars always attach a password, while the committed
+`application.properties` ships with an empty one — so the two would contradict each other.
+The snippet explains how to switch to a real password if you want one, including the
+`caching_sha2_password` / `allowPublicKeyRetrieval` wrinkle that comes with it.
 
 `TZ` is worth keeping in step with `serverTimezone` in the JDBC URL (`America/Lima` in both here).
 Connector/J converts `TIMESTAMP` columns through the connection zone, so a mismatch between the dev
 server and the test container makes timestamps differ by the offset in one environment only.
-
-Whatever user and password you create, put the same values in `spring.datasource.username` /
-`spring.datasource.password`. If you give the user a password, note that MySQL 8 defaults to
-`caching_sha2_password`: with `useSSL=false` in the URL you will then need
-`allowPublicKeyRetrieval=true`, or a TLS connection.
 
 Load `database-model/` scripts **in this order** — `sakila-schema.sql`, then `sakila-data.sql`, then `auth-fixture.sql`. The first two are vendored from Oracle (own copyright header) — don't edit them; put schema changes in `auth-fixture.sql` or a new script. `sakila.mwb` is the MySQL Workbench model, kept in sync manually.
 

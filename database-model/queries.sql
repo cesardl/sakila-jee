@@ -1,3 +1,22 @@
+-- Creates the application account the committed application.properties expects. Run it as
+-- root once, after the schema/data/auth-fixture scripts.
+--
+-- No password, because application.properties ships with an empty one. That is a local-dev
+-- choice, not a recommendation: the container is a throwaway and its 3306 is only reachable
+-- through the port you published. To use a real password instead, add IDENTIFIED BY here,
+-- put the same value in spring.datasource.password, and add allowPublicKeyRetrieval=true to
+-- the JDBC URL -- MySQL 8 defaults to caching_sha2_password, which will not send credentials
+-- over the plaintext connection that useSSL=false asks for.
+--
+-- '%' rather than 'localhost' is required, not sloppiness: a connection from the host into
+-- the container arrives from the Docker network gateway, so 'travis'@'localhost' never
+-- matches. The published port is the boundary here.
+/*
+CREATE USER 'travis'@'%';
+GRANT ALL PRIVILEGES ON sakila.* TO 'travis'@'%';
+FLUSH PRIVILEGES;
+*/
+
 select actor0_.actor_id as actor_id1_0_0_, actor0_.first_name as first_na2_0_0_, actor0_.last_name as last_nam3_0_0_, actor0_.last_update as last_upd4_0_0_
 from sakila.actor actor0_ where actor0_.actor_id=122;
 
