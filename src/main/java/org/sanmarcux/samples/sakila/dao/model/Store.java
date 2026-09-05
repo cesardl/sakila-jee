@@ -78,7 +78,7 @@ public class Store implements java.io.Serializable {
         this.address = address;
     }
 
-    @Column(name = "last_update", nullable = false, length = 19)
+    @Column(name = "last_update", nullable = false, insertable = false, updatable = false)
     public Date getLastUpdate() {
         return this.lastUpdate;
     }

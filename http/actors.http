@@ -134,12 +134,7 @@ Authorization: Bearer {{auth_token}}
     });
 %}
 
-### Update.
-#
-# NOTE: this is mapped as PATCH but behaves as PUT. ActorBusinessImpl.modify maps the
-# payload into a *fresh* Actor and saves it, so any field you omit is written as NULL.
-# Sending only {"lastName": "..."} nulls first_name, which is NOT NULL in Sakila, and
-# you get a 500. Hence the full body below.
+### Update, full body. The partial case is the next request.
 PATCH {{new_actor_url}}
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
@@ -155,9 +150,9 @@ Content-Type: application/json
     });
 %}
 
-### Partial PATCH -> 500. Characterization test for the bug described above:
-# this SHOULD be a 200 (or a 400), and it will fail here the day modify() is fixed
-# to merge onto the managed entity. That failure is the signal to delete this request.
+### Partial PATCH. Sends only lastName; firstName must survive untouched.
+# modify() used to map the payload onto a brand new Actor, so everything the caller left
+# out was nulled and the NOT NULL last_update turned the whole request into a 500.
 PATCH {{new_actor_url}}
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
@@ -165,9 +160,17 @@ Content-Type: application/json
 {"lastName": "PARTIAL"}
 
 > {%
-    client.test("KNOWN BUG: a partial PATCH nulls the other columns and 500s", function () {
-        client.assert(response.status === 500,
-            "modify() looks fixed (got " + response.status + ") - drop this request and the note above it");
+    // IntelliJ returns response.body parsed on some versions and raw on others.
+    var body = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+
+    client.test("200 on a partial update", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
+    });
+
+    client.test("the omitted field is preserved", function () {
+        client.assert(body.lastName === "PARTIAL", "lastName was not applied");
+        client.assert(body.firstName === "HTTPCLIENT",
+            "firstName was wiped by a partial PATCH: " + body.firstName);
     });
 %}
 
@@ -176,8 +179,8 @@ DELETE {{new_actor_url}}
 Authorization: Bearer {{auth_token}}
 
 > {%
-    client.test("200 on delete", function () {
-        client.assert(response.status === 200, "expected 200, got " + response.status);
+    client.test("204 on delete", function () {
+        client.assert(response.status === 204, "expected 204, got " + response.status);
     });
 %}
 

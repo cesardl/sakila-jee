@@ -82,26 +82,27 @@ Authorization: Bearer {{auth_token}}
     });
 %}
 
-### Film id above 32767 -> 500. Characterization test for a type mismatch:
-#
-#   Film.filmId          is Short
-#   FilmRepository       is JpaRepository<Film, Integer>
-#   FilmRestController   takes @PathVariable Integer
-#
-# so any id past Short.MAX_VALUE blows up in the Integer->Short conversion instead of
-# missing cleanly. Two consequences: unknown ids in that range answer 500 rather than
-# 404, and films 32768-65535 are unreachable even though film_id is SMALLINT UNSIGNED
-# (max 65535). Actors and customers use Integer end to end and answer 404 correctly.
-#
-# Fixing means settling on one type across entity, repository, DTO and controller.
-# When that lands this request starts failing - that is the cue to delete it.
+### Film id above 32767. Film.filmId was Short while FilmRepository is typed
+# JpaRepository<Film, Integer>, so any id past Short.MAX_VALUE blew up in the
+# Integer->Short conversion instead of missing cleanly: a 500 where a 404 belongs, and
+# films 32768-65535 unreachable even though film_id is SMALLINT UNSIGNED (max 65535).
+# The entity now uses Integer, matching the repository, DTO and controller.
 GET {{host}}/films/40000
 Authorization: Bearer {{auth_token}}
 
 > {%
-    client.test("KNOWN BUG: film id > Short.MAX_VALUE gives 500, not 404", function () {
-        client.assert(response.status === 500,
-            "the Short/Integer mismatch looks fixed (got " + response.status + ") - drop this request");
+    client.test("404 above the old Short ceiling", function () {
+        client.assert(response.status === 404, "expected 404, got " + response.status);
+    });
+%}
+
+### The top of the SMALLINT UNSIGNED range must also answer cleanly.
+GET {{host}}/films/65535
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.test("404 at the top of the column range", function () {
+        client.assert(response.status === 404, "expected 404, got " + response.status);
     });
 %}
 

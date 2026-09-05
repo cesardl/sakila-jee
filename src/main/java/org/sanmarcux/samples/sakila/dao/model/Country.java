@@ -56,7 +56,7 @@ public class Country implements java.io.Serializable {
         this.country = country;
     }
 
-    @Column(name = "last_update", nullable = false, length = 19)
+    @Column(name = "last_update", nullable = false, insertable = false, updatable = false)
     public Date getLastUpdate() {
         return this.lastUpdate;
     }

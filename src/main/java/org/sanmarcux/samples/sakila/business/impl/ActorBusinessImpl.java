@@ -16,8 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 /**
@@ -33,8 +33,10 @@ public class ActorBusinessImpl implements ActorBusiness {
 
     private final ModelMapper modelMapper;
 
+    // public, not private: @Transactional on modify() makes Spring CGLIB-proxy this class,
+    // and CGLIB cannot subclass a type whose only constructor is private.
     @Autowired
-    private ActorBusinessImpl(ActorRepository actorRepository,
+    public ActorBusinessImpl(ActorRepository actorRepository,
                               FilmActorRepository filmActorRepository,
                               ModelMapper modelMapper) {
         this.actorRepository = actorRepository;
@@ -64,14 +66,27 @@ public class ActorBusinessImpl implements ActorBusiness {
                         modelMapper.map(payload, Actor.class)), ActorDTO.class);
     }
 
+    @Transactional
     @Override
     public ActorDTO modify(final Integer actorId, final ActorDTO payload) {
-        Actor actor = modelMapper.map(payload, Actor.class);
+        // An id in the body that disagrees with the URL is a client mistake, not something
+        // to silently discard. create() already rejects a client-supplied id; the two write
+        // paths should not disagree about that.
+        if (payload.getActorId() != null && !payload.getActorId().equals(actorId)) {
+            throw new OperationNotAllowedException("The actor id in the payload does not match the URL");
+        }
+
+        // PATCH is a partial update, so merge onto the managed row instead of mapping the
+        // payload onto a fresh Actor: that nulled every field the caller left out, which
+        // wiped first_name/last_name and blew up on the NOT NULL last_update.
+        // ModelMapper is configured with skipNullEnabled, so absent fields are left alone.
+        Actor actor = actorRepository.findById(actorId)
+                .orElseThrow(() -> new ActorNotFoundException(actorId));
+
+        modelMapper.map(payload, actor);
         actor.setActorId(actorId);
 
-        actorRepository.save(actor);
-
-        return modelMapper.map(actor, ActorDTO.class);
+        return modelMapper.map(actorRepository.save(actor), ActorDTO.class);
     }
 
     @Override
@@ -90,7 +105,6 @@ public class ActorBusinessImpl implements ActorBusiness {
     public void createFilmParticipation(final Integer actorId, final Integer filmId) {
         FilmActor filmActor = new FilmActor();
         filmActor.setId(new FilmActorId(actorId, filmId));
-        filmActor.setLastUpdate(LocalDateTime.now());
         filmActorRepository.save(filmActor);
     }
 

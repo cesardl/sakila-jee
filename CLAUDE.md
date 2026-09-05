@@ -8,17 +8,39 @@ Spring Boot 4 / Java 21 REST backend over the MySQL "Sakila" sample database (fi
 
 ## Database setup
 
-The app expects a MySQL instance with the Sakila schema loaded. Local dev via Docker:
+**The one hard requirement is MySQL 8.** Everything else below — port, database user, password,
+container name — is configuration: change it freely, point `spring.datasource.*` at whatever you
+used, and the app works. Change the *server version* and something will break, quietly.
+
+Why 8 specifically: `explicit_defaults_for_timestamp` flipped from `0` to `1` in MySQL 8.0.2. On
+5.7 an explicit `NULL` into a `TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP` column was silently
+rewritten to the current time; on 8 it is `ERROR 1048: Column ... cannot be null`. That difference
+already cost one live bug (`POST /actors`) that the 5.7 test container could not see. The
+Testcontainer in `AbstractIntegrationTest` is pinned to 8 for exactly this reason — keep it and the
+dev server on the same major version.
+
+Local dev via Docker (port and credentials here are examples, not requirements):
 
 ```
-docker run --name sakila-db -p 3314:3306 --restart on-failure -e MYSQL_DATABASE=sakila -e MYSQL_ROOT_PASSWORD=rootroot -e MYSQL_USER=travis -e MYSQL_PASSWORD=my-secret-pw -e TZ='America/Lima' -d mysql --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --log_bin_trust_function_creators=1
+docker run --name sakila-db -p 3312:3306 --restart on-failure -e MYSQL_DATABASE=sakila -e MYSQL_ROOT_PASSWORD=rootroot -e TZ='America/Lima' -d mysql:8.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --log_bin_trust_function_creators=1
 ```
+
+Then load the scripts (below) and create the application account from the snippet at the top of
+`database-model/queries.sql`. The account is made there rather than through `MYSQL_USER`/
+`MYSQL_PASSWORD` because those env vars always attach a password, while the committed
+`application.properties` ships with an empty one — so the two would contradict each other.
+The snippet explains how to switch to a real password if you want one, including the
+`caching_sha2_password` / `allowPublicKeyRetrieval` wrinkle that comes with it.
+
+`TZ` is worth keeping in step with `serverTimezone` in the JDBC URL (`America/Lima` in both here).
+Connector/J converts `TIMESTAMP` columns through the connection zone, so a mismatch between the dev
+server and the test container makes timestamps differ by the offset in one environment only.
 
 Load `database-model/` scripts **in this order** — `sakila-schema.sql`, then `sakila-data.sql`, then `auth-fixture.sql`. The first two are vendored from Oracle (own copyright header) — don't edit them; put schema changes in `auth-fixture.sql` or a new script. `sakila.mwb` is the MySQL Workbench model, kept in sync manually.
 
 `auth-fixture.sql` replaced the old `data.sql`, which was a Travis-era minimal extraction whose rows now collide with the full dump.
 
-Dev DB is `jdbc:mysql://localhost:3310/sakila`. App runs on `8181`; actuator on `127.0.0.1:8182`.
+The committed config points at `jdbc:mysql://localhost:3312/sakila`; app on `8181`, actuator on `127.0.0.1:8182`. Ports again: config, not contract.
 
 ## Common commands
 
@@ -62,6 +84,16 @@ Key conventions to preserve when touching this code:
 - **"Not found" is a per-entity exception + per-entity `@RestControllerAdvice`** (`XNotFoundException` / `XNotFoundAdvice`), not a single generic handler. `ResourceNotFoundException`/`OperationNotAllowedException` are the two generic exceptions used for cross-cutting cases (e.g. rejecting a payload that sets an ID on create).
 - **JPA enum columns use an `AttributeConverter`**, not `@Enumerated` — see `Rating` + `RatingConverter` (maps enum ↔ the short DB code like `"PG-13"`) and `YearConverter`. Mirror this for new enum-backed columns.
 - Repositories are plain `JpaRepository` interfaces in `dao/`; custom queries (e.g. `FilmRepository.findAllByActor`) live there, not in the business layer.
+- **`last_update` is owned by the database, never by Java.** Every such column in Sakila is
+  `TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`, so all of them map as
+  `@Column(..., insertable = false, updatable = false)` and no business code sets them. Leaving one
+  insertable makes an omitted value an explicit `NULL`, which MySQL 8 rejects; leaving one updatable
+  makes Hibernate write back the stale loaded value and suppress `ON UPDATE`. `customer.create_date`
+  is the sole exception — it has no default, so `CustomerBusinessImpl.save()` sets it.
+- **Don't substitute static values for payload data.** Resolve what the client sent (see
+  `CustomerBusinessImpl.resolveStore`/`resolveAddress`, which 404 on an unknown id) and let
+  `@Valid` + `@NotNull` reject what is genuinely required. Boxed types on optional flags:
+  `CustomerDTO.active` is a `Boolean` so that "absent" means the column default rather than `false`.
 
 ## Security
 
@@ -81,7 +113,7 @@ Boot 4 / Security 7 gotchas already hit and solved here — don't reintroduce th
 
 ## Tests
 
-`mvn clean verify` — tests start a throwaway `mysql:5.7.44` Testcontainer seeded from `database-model/` (`AbstractIntegrationTest`), so they never touch the local dev DB. Docker must be running.
+`mvn clean verify` — tests start a throwaway `mysql:8.0.46` Testcontainer seeded from `database-model/` (`AbstractIntegrationTest`), so they never touch the local dev DB. Docker must be running.
 
 - The container is a **static field**, not a `@Bean`: Spring caches one context per distinct test configuration, and a bean would reload the 3.4MB dump per context.
 - Init scripts run in **alphabetical** order inside the container, hence the `01-`/`02-`/`03-` prefixes.

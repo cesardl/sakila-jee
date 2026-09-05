@@ -15,19 +15,19 @@ import jakarta.persistence.Table;
 public class FilmText implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
-    private short filmId;
+    private Integer filmId;
     private String title;
     private String description;
 
     public FilmText() {
     }
 
-    public FilmText(short filmId, String title) {
+    public FilmText(Integer filmId, String title) {
         this.filmId = filmId;
         this.title = title;
     }
 
-    public FilmText(short filmId, String title, String description) {
+    public FilmText(Integer filmId, String title, String description) {
         this.filmId = filmId;
         this.title = title;
         this.description = description;
@@ -35,11 +35,11 @@ public class FilmText implements java.io.Serializable {
 
     @Id
     @Column(name = "film_id", unique = true, nullable = false)
-    public short getFilmId() {
+    public Integer getFilmId() {
         return this.filmId;
     }
 
-    public void setFilmId(short filmId) {
+    public void setFilmId(Integer filmId) {
         this.filmId = filmId;
     }
 

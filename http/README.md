@@ -20,7 +20,7 @@ $env:JAVA_HOME = "C:\Program Files\Java\jdk-21"   # shell JAVA_HOME points at 11
 $env:JWT_SECRET = "<at least 32 bytes>"           # no default; app will not start without it
 ```
 
-Dev DB (MySQL 5.7 on `3310`) must be up and seeded, in this order:
+Dev DB (MySQL 8.0 on `3312`) must be up and seeded, in this order:
 `sakila-schema.sql` → `sakila-data.sql` → `auth-fixture.sql`.
 
 > **Re-run `auth-fixture.sql` before using this suite.** It now seeds a `disabled`
@@ -39,7 +39,7 @@ missing, copy the shape from `http-client.env.json` and add `username`/`password
 mvn clean verify
 ```
 
-28 tests, Testcontainers pulls `mysql:5.7.44` and seeds it from `database-model/`.
+33 tests, Testcontainers pulls `mysql:8.0.46` and seeds it from `database-model/`.
 Docker must be running. If this is red, do not bother with the `.http` files.
 
 ## 2. Start the app
@@ -119,29 +119,34 @@ than #6, the fix has been reverted.
 
 ---
 
-## 5. Known bugs, pinned on purpose
+## 5. Bugs these files used to pin — now fixed
 
-Four assertions are **characterization tests**: they assert current, wrong behaviour so
-that fixing it fails the suite loudly instead of silently changing the contract. Each is
-commented in place. If one of these goes red, read the message — it is telling you
-something got fixed, and the assertion should then be deleted.
+The suite carried four **characterization tests**: assertions of current, wrong behaviour,
+written so that fixing the bug failed the suite loudly instead of silently changing the
+contract. All four have now been fixed, and each assertion was rewritten to demand the
+correct behaviour instead.
 
-| Where | Pinned behaviour | Correct behaviour |
+| Where | Was | Now |
 |---|---|---|
-| `actors.http` | PATCH maps to a fresh entity, nulling omitted fields (500 on partial payloads) | true partial update |
-| `customers.http` | `save()` ignores payload `store`/`address`, hardcodes 2 / 591 | honour the payload |
-| `customers.http` | PUT returns 201 | 200 |
-| `films.http` | `film_id > 32767` → 500 (`Film.filmId` is `Short`, repo is typed `Integer`) | 404 |
+| `actors.http` | PATCH mapped to a fresh entity, nulling omitted fields (500 on partial payloads) | true partial update, omitted fields preserved |
+| `customers.http` | `save()` ignored payload `store`/`address`, hardcoded 2 / 591 | payload honoured, unknown ids give 404 |
+| `customers.http` | PUT returned 201 | 200 |
+| `films.http` | `film_id > 32767` → 500 (`Film.filmId` was `Short`, repo typed `Integer`) | 404, entity is `Integer` |
 
-The `Film.filmId` one is the same class of bug as `Staff.staffId`, which was `Byte`
-against a `TINYINT UNSIGNED` column and is now `Integer`.
+The `Film.filmId` one was the same class of bug as `Staff.staffId`, which was `Byte`
+against a `TINYINT UNSIGNED` column and is also now `Integer`.
+
+Each fix is covered by a JUnit test as well, so the regression is caught by
+`mvn verify` and not only by running these files by hand. The pattern is worth keeping:
+when you find behaviour you cannot fix immediately, pin it with an assertion that fails
+on the day it changes.
 
 ---
 
 ## 6. Database drift
 
 `films.http` and `customers.http` log a WARNING (not a failure) when row counts drift
-from the stock dump. Current state of the dev DB on 3310:
+from the stock dump. Current state of the dev DB on 3312:
 
 | Table | Expected | Actual | Drift |
 |---|---|---|---|

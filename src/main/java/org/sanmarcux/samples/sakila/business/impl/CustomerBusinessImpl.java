@@ -68,17 +68,20 @@ public class CustomerBusinessImpl implements CustomerBusiness {
 
         Customer c = modelMapper.map(payload, Customer.class);
 
-        Store s = new Store();
-        s.setStoreId(2);
-        c.setStore(s);
+        // Both are @NotNull on CustomerDTO, so @Valid has already rejected a payload that
+        // omits them. Resolve rather than trust: a client-supplied id that does not exist
+        // would otherwise fail late, as a foreign key violation.
+        c.setStore(resolveStore(payload.getStore().getStoreId()));
+        c.setAddress(resolveAddress(payload.getAddress().getAddressId()));
 
-        Address a = new Address();
-        a.setAddressId(591);
-        c.setAddress(a);
+        // customer.active is NOT NULL DEFAULT TRUE, but the entity field is a primitive, so
+        // an omitted flag reached the insert as an explicit 0 and every customer created
+        // through the API was born inactive. Absent now means the column default.
+        c.setActive(payload.getActive() == null || payload.getActive());
 
-        LocalDateTime now = LocalDateTime.now();
-        c.setCreateDate(now);
-        c.setLastUpdate(now);
+        // create_date is the one timestamp the schema does NOT default; last_update is
+        // DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP and is mapped read-only.
+        c.setCreateDate(LocalDateTime.now());
 
         CustomerDTO dto = modelMapper.map(customerRepository.save(c), CustomerDTO.class);
         return assembler.toModel(dto);
@@ -96,18 +99,14 @@ public class CustomerBusinessImpl implements CustomerBusiness {
         Customer managedCustomer = customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
 
         if (payload.getAddress().getAddressId() != null) {
-            Address newAddress = addressRepository.findById(payload.getAddress().getAddressId()).orElseThrow(() -> new ResourceNotFoundException("Address not found"));
-            managedCustomer.setAddress(newAddress);
+            managedCustomer.setAddress(resolveAddress(payload.getAddress().getAddressId()));
         }
 
         if (payload.getStore().getStoreId() != null) {
-            Store newStore = storeRepository.findById(payload.getStore().getStoreId()).orElseThrow(() -> new ResourceNotFoundException("Store not found"));
-            managedCustomer.setStore(newStore);
+            managedCustomer.setStore(resolveStore(payload.getStore().getStoreId()));
         }
 
         modelMapper.map(payload, managedCustomer);
-
-        managedCustomer.setLastUpdate(LocalDateTime.now());
 
         CustomerDTO dto = modelMapper.map(customerRepository.save(managedCustomer), CustomerDTO.class);
         return assembler.toModel(dto);
@@ -116,5 +115,15 @@ public class CustomerBusinessImpl implements CustomerBusiness {
     @Override
     public void deleteCustomer(final Integer id) {
         customerRepository.deleteById(id);
+    }
+
+    private Store resolveStore(final Integer storeId) {
+        return storeRepository.findById(storeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
+    }
+
+    private Address resolveAddress(final Integer addressId) {
+        return addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
     }
 }

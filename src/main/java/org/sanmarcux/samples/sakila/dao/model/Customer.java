@@ -136,7 +136,7 @@ public class Customer implements java.io.Serializable {
         this.createDate = createDate;
     }
 
-    @Column(name = "last_update", nullable = false)
+    @Column(name = "last_update", nullable = false, insertable = false, updatable = false)
     public LocalDateTime getLastUpdate() {
         return this.lastUpdate;
     }

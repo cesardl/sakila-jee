@@ -65,7 +65,7 @@ public class FilmActor implements java.io.Serializable {
         this.film = film;
     }
 
-    @Column(name = "last_update", nullable = false)
+    @Column(name = "last_update", nullable = false, insertable = false, updatable = false)
     public LocalDateTime getLastUpdate() {
         return this.lastUpdate;
     }
