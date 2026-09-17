@@ -110,7 +110,9 @@ public class ActorRestController {
         LOG.info("Invoking Rest Service deleteActor");
         actorBusiness.delete(actorId);
 
-        return ResponseEntity.ok().build();
+        // 204, matching DELETE /customers/{id}: there is no body, and a client should be
+        // able to treat DELETE the same way across every resource.
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{actorId}/films")
@@ -144,6 +146,6 @@ public class ActorRestController {
         LOG.info("Invoking Rest Service deleteActorFilm");
         actorBusiness.deleteFilm(actorId, filmId);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

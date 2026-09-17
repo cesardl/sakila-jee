@@ -16,6 +16,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -51,13 +52,50 @@ public class CustomerRestControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/customers/99999")).andExpect(status().isNotFound());
     }
 
+    /**
+     * save() used to discard the payload and hardcode store 2 / address 591, so every
+     * customer landed in the same store no matter what the client asked for. It also never
+     * set active, and the primitive field wrote 0, so every customer was born inactive.
+     */
     @Test
     public void createCustomer() throws Exception {
         this.mockMvc.perform(post("/customers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(buildCustomer())))
                 .andExpect(status().isCreated())
-                .andExpect(header().exists("Location"));
+                .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.store.storeId", is(1)))
+                .andExpect(jsonPath("$.address.addressId", is(1)))
+                .andExpect(jsonPath("$.active", is(true)));
+    }
+
+    /**
+     * An explicit flag in the payload wins over the column default.
+     */
+    @Test
+    public void createInactiveCustomer() throws Exception {
+        CustomerDTO customer = buildCustomer();
+        customer.setActive(false);
+
+        this.mockMvc.perform(post("/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(customer)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.active", is(false)));
+    }
+
+    /**
+     * A store id that does not exist is a 404, not a late foreign key violation.
+     */
+    @Test
+    public void createCustomerWithUnknownStore() throws Exception {
+        CustomerDTO customer = buildCustomer();
+        customer.getStore().setStoreId(9999);
+
+        this.mockMvc.perform(post("/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(customer)))
+                .andExpect(status().isNotFound());
     }
 
     /**
@@ -87,21 +125,31 @@ public class CustomerRestControllerTest extends AbstractIntegrationTest {
     }
 
     /**
-     * Characterization test, not an endorsement: replaceCustomer() answers
-     * ResponseEntity.created(), so a PUT that updates an existing row reports 201 where
-     * REST says 200. Pinned so the day it is fixed this fails and says why, instead of
-     * the change going unnoticed.
+     * A PUT that replaces an existing customer answers 200. It used to answer 201, which
+     * is for creation only.
+     * <p>
+     * Creates and deletes its own row rather than rewriting fixture customer 1, which
+     * readCustomer asserts is still MARY -- that only held because JUnit happened to order
+     * the two methods favourably, and a rename would have silently flipped it.
      */
     @Test
-    public void replaceCustomerReturns201() throws Exception {
+    public void replaceCustomerReturns200() throws Exception {
+        String location = this.mockMvc.perform(post("/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(buildCustomer())))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getHeader("Location");
+
         CustomerDTO customer = buildCustomer();
         customer.setLastName("REPLACED");
 
-        this.mockMvc.perform(put("/customers/1")
+        this.mockMvc.perform(put(location)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(customer)))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.lastName", is("REPLACED")));
+
+        this.mockMvc.perform(delete(location)).andExpect(status().isNoContent());
     }
 
     private CustomerDTO buildCustomer() {

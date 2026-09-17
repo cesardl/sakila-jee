@@ -124,7 +124,7 @@ public class Address implements java.io.Serializable {
         this.phone = phone;
     }
 
-    @Column(name = "last_update", nullable = false, length = 19)
+    @Column(name = "last_update", nullable = false, insertable = false, updatable = false)
     public Date getLastUpdate() {
         return this.lastUpdate;
     }

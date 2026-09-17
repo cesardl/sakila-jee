@@ -25,6 +25,8 @@
 /nbdist/
 /.nb-gradle/
 
+.ai/
+
 ### IntelliJ HTTP Client ###
 # credentials live here; the public http-client.env.json is committed
 http-client.private.env.json

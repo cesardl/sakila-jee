@@ -71,7 +71,7 @@ public class Inventory implements java.io.Serializable {
         this.film = film;
     }
 
-    @Column(name = "last_update", nullable = false, length = 19)
+    @Column(name = "last_update", nullable = false, insertable = false, updatable = false)
     public Date getLastUpdate() {
         return this.lastUpdate;
     }

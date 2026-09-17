@@ -55,7 +55,7 @@ public class Staff implements java.io.Serializable {
     @Column(name = "password", length = 255)
     private String password;
 
-    @Column(name = "last_update", nullable = false)
+    @Column(name = "last_update", nullable = false, insertable = false, updatable = false)
     private LocalDateTime lastUpdate;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "staff")

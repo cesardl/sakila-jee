@@ -74,7 +74,7 @@ Authorization: Bearer {{auth_token}}
 ### Write lifecycle: create -> read -> replace -> delete -> gone. Self-cleaning.
 ### ---------------------------------------------------------------------------
 
-### Create. Deliberately sends store 1 / address 5 - see the assertion below.
+### Create. Sends store 1 / address 5 and expects them back - see the assertion below.
 # @name createCustomer
 POST {{host}}/customers
 Authorization: Bearer {{auth_token}}
@@ -97,14 +97,13 @@ Content-Type: application/json
         client.assert(body._links.self.href.length > 0, "no self link in the body");
     });
 
-    // Characterization test, not an endorsement: CustomerBusinessImpl.save() throws away
-    // the store and address from the payload and hardcodes 2 and 591. Pinned here so the
-    // day that is fixed, this fails and tells you why instead of going unnoticed.
-    client.test("KNOWN BUG: store/address from the payload are ignored", function () {
-        client.assert(body.store.storeId === 2 && body.address.addressId === 591,
-            "save() looks fixed (store " + body.store.storeId
-            + ", address " + body.address.addressId
-            + ") - drop this assertion and the note above it");
+    // save() used to discard these and hardcode store 2 / address 591, so every customer
+    // landed in the same store regardless of what the client asked for.
+    client.test("the payload store and address are honoured", function () {
+        client.assert(body.store.storeId === 1,
+            "store from the payload was ignored: got " + body.store.storeId);
+        client.assert(body.address.addressId === 5,
+            "address from the payload was ignored: got " + body.address.addressId);
     });
 
     client.global.set("new_customer_url", body._links.self.href);
@@ -143,11 +142,10 @@ Content-Type: application/json
         client.assert(body.lastName === "REPLACED", "lastName was not updated");
     });
 
-    // Characterization test: replaceCustomer() answers ResponseEntity.created(), so an
-    // update of an existing resource reports 201. Should be 200.
-    client.test("KNOWN BUG: update returns 201 instead of 200", function () {
-        client.assert(response.status === 201,
-            "replaceCustomer looks fixed (got " + response.status + ") - drop this assertion");
+    // replaceCustomer() used to answer ResponseEntity.created(), reporting 201 for an
+    // update of a resource that already existed.
+    client.test("200 on replacing an existing customer", function () {
+        client.assert(response.status === 200, "expected 200, got " + response.status);
     });
 %}
 

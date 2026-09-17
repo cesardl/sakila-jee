@@ -3,6 +3,7 @@ package org.sanmarcux.samples.sakila.controller;
 import org.junit.jupiter.api.Test;
 import org.sanmarcux.samples.sakila.AbstractIntegrationTest;
 import org.sanmarcux.samples.sakila.SakilaApplication;
+import org.sanmarcux.samples.sakila.dto.ActorDTO;
 import org.sanmarcux.samples.sakila.dto.FilmDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -53,6 +54,33 @@ public class ActorRestControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    /**
+     * Creating an actor had no test of its own -- it was only ever exercised as a side
+     * effect of the PATCH test. It also never sets last_update, which MySQL 5.7 quietly
+     * filled in and MySQL 8 rejects, so this is the case that broke against a real 8.0
+     * server while the 5.7 test container stayed green.
+     */
+    @Test
+    public void createActor() throws Exception {
+        ActorDTO payload = new ActorDTO();
+        payload.setFirstName("CREATED");
+        payload.setLastName("BYTEST");
+
+        String location = this.mockMvc.perform(post("/actors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(payload)))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"))
+                .andReturn().getResponse().getHeader("Location");
+
+        this.mockMvc.perform(get(location))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName", is("CREATED")))
+                .andExpect(jsonPath("$.lastName", is("BYTEST")));
+
+        this.mockMvc.perform(delete(location)).andExpect(status().isNoContent());
+    }
+
     @Test
     public void readSingleFilm() throws Exception {
         mockMvc.perform(get("/actors/1/films/1"))
@@ -89,6 +117,38 @@ public class ActorRestControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(delete("/actors/" + actorId + "/films/3"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
+    }
+
+    /**
+     * PATCH is a partial update. modify() used to map the payload onto a brand new Actor,
+     * so any field the caller left out was nulled -- which wiped last_name and then failed
+     * outright on the NOT NULL last_update. Creates and removes its own row so the shared
+     * fixture actors keep their names.
+     */
+    @Test
+    public void partialUpdateKeepsOmittedFields() throws Exception {
+        ActorDTO payload = new ActorDTO();
+        payload.setFirstName("PATCH");
+        payload.setLastName("SUBJECT");
+
+        String location = this.mockMvc.perform(post("/actors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(payload)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getHeader("Location");
+
+        this.mockMvc.perform(patch(location)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"firstName\":\"PATCHED\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName", is("PATCHED")))
+                .andExpect(jsonPath("$.lastName", is("SUBJECT")));
+
+        this.mockMvc.perform(get(location))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.lastName", is("SUBJECT")));
+
+        this.mockMvc.perform(delete(location)).andExpect(status().isNoContent());
     }
 }

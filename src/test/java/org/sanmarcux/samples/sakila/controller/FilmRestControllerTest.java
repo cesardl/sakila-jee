@@ -61,6 +61,17 @@ public class FilmRestControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/films/2000")).andExpect(status().isNotFound());
     }
 
+    /**
+     * film_id is SMALLINT UNSIGNED (0-65535) but the entity mapped it as Short, which stops
+     * at 32767, so an id above that threw converting the repository's Integer argument into
+     * the identifier -- a 500 instead of a 404. 40000 sits in the gap.
+     */
+    @Test
+    public void filmNotFoundAboveShortRange() throws Exception {
+        mockMvc.perform(get("/films/40000")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/films/65535")).andExpect(status().isNotFound());
+    }
+
     @Test
     public void readFilmData() throws Exception {
         mockMvc.perform(get("/films/1"))

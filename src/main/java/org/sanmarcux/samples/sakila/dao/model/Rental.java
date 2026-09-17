@@ -110,7 +110,7 @@ public class Rental implements java.io.Serializable {
         this.returnDate = returnDate;
     }
 
-    @Column(name = "last_update", nullable = false, length = 19)
+    @Column(name = "last_update", nullable = false, insertable = false, updatable = false)
     public Date getLastUpdate() {
         return this.lastUpdate;
     }

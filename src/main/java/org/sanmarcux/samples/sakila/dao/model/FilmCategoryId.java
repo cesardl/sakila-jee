@@ -12,23 +12,23 @@ import jakarta.persistence.Embeddable;
 public class FilmCategoryId implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
-    private short filmId;
+    private Integer filmId;
     private byte categoryId;
 
     public FilmCategoryId() {
     }
 
-    public FilmCategoryId(short filmId, byte categoryId) {
+    public FilmCategoryId(Integer filmId, byte categoryId) {
         this.filmId = filmId;
         this.categoryId = categoryId;
     }
 
     @Column(name = "film_id", nullable = false)
-    public short getFilmId() {
+    public Integer getFilmId() {
         return this.filmId;
     }
 
-    public void setFilmId(short filmId) {
+    public void setFilmId(Integer filmId) {
         this.filmId = filmId;
     }
 
@@ -49,14 +49,17 @@ public class FilmCategoryId implements java.io.Serializable {
         if (!(other instanceof FilmCategoryId castOther))
             return false;
 
-        return (this.getFilmId() == castOther.getFilmId())
+        // filmId is a boxed Integer (film_id is SMALLINT UNSIGNED, so a primitive short
+        // could not hold the top of the range). Compare with equals, not ==, or two ids
+        // above the Integer cache would count as different rows.
+        return java.util.Objects.equals(this.getFilmId(), castOther.getFilmId())
                 && (this.getCategoryId() == castOther.getCategoryId());
     }
 
     public int hashCode() {
         int result = 17;
 
-        result = 37 * result + this.getFilmId();
+        result = 37 * result + (getFilmId() == null ? 0 : this.getFilmId().hashCode());
         result = 37 * result + this.getCategoryId();
         return result;
     }

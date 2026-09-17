@@ -26,6 +26,13 @@ public class CustomerDTO {
     @NotNull
     private AddressDTO address;
 
+    /**
+     * Boxed on purpose. Absent means "use the column default", which is TRUE -- a
+     * primitive would make every payload that omits the flag look like an explicit
+     * false, which is exactly how API-created customers ended up inactive.
+     */
+    private Boolean active;
+
     public Integer getCustomerId() {
         return customerId;
     }
@@ -72,5 +79,13 @@ public class CustomerDTO {
 
     public void setAddress(AddressDTO address) {
         this.address = address;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }

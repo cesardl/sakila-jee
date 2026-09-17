@@ -61,9 +61,9 @@ public class CustomerRestController {
 
         EntityModel<CustomerDTO> entityModel = business.modify(id, newCustomer);
 
-        return ResponseEntity
-                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
-                .body(entityModel);
+        // 200, not 201: this replaces an existing customer. 201 is for newCustomer, which
+        // is the only path here that brings a resource into existence.
+        return ResponseEntity.ok(entityModel);
     }
 
     @DeleteMapping("/{id}")
