@@ -17,7 +17,10 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 public class Payment implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
-    private Short paymentId;
+    // payment_id is SMALLINT UNSIGNED (0-65535); Short tops out at 32767 -- same overflow
+    // bug fixed on Film.filmId. No repository/controller exposes Payment today, so this
+    // is a latent fix rather than something a failing test currently pins.
+    private Integer paymentId;
     private Staff staff;
     private Customer customer;
     private Rental rental;
@@ -50,11 +53,11 @@ public class Payment implements java.io.Serializable {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "payment_id", unique = true, nullable = false)
-    public Short getPaymentId() {
+    public Integer getPaymentId() {
         return this.paymentId;
     }
 
-    public void setPaymentId(Short paymentId) {
+    public void setPaymentId(Integer paymentId) {
         this.paymentId = paymentId;
     }
 

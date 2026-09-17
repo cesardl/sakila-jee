@@ -17,7 +17,10 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 public class City implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
-    private Short cityId;
+    // city_id is SMALLINT UNSIGNED (0-65535); Short tops out at 32767 -- same overflow
+    // bug fixed on Film.filmId. No repository/controller exposes City today, so this
+    // is a latent fix rather than something a failing test currently pins.
+    private Integer cityId;
     private Country country;
     private String city;
     private Date lastUpdate;
@@ -42,11 +45,11 @@ public class City implements java.io.Serializable {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "city_id", unique = true, nullable = false)
-    public Short getCityId() {
+    public Integer getCityId() {
         return this.cityId;
     }
 
-    public void setCityId(Short cityId) {
+    public void setCityId(Integer cityId) {
         this.cityId = cityId;
     }
 
