@@ -96,6 +96,13 @@ public class CustomerBusinessImpl implements CustomerBusiness {
     @Transactional
     @Override
     public EntityModel<CustomerDTO> modify(final Integer id, final CustomerDTO payload) {
+        // An id in the body that disagrees with the URL is a client mistake, not something
+        // to silently discard. save() already rejects a client-supplied id; the two write
+        // paths should not disagree about that.
+        if (payload.getCustomerId() != null && !payload.getCustomerId().equals(id)) {
+            throw new OperationNotAllowedException("The customer id in the payload does not match the URL");
+        }
+
         Customer managedCustomer = customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
 
         if (payload.getAddress().getAddressId() != null) {
