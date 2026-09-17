@@ -115,6 +115,11 @@ public class CustomerBusinessImpl implements CustomerBusiness {
 
         modelMapper.map(payload, managedCustomer);
 
+        // Same contract as save(): active is boxed so absent means the column default,
+        // not "leave whatever was already there" -- ModelMapper's skip-null merge above
+        // would otherwise preserve the old value instead of applying the default.
+        managedCustomer.setActive(payload.getActive() == null || payload.getActive());
+
         CustomerDTO dto = modelMapper.map(customerRepository.save(managedCustomer), CustomerDTO.class);
         return assembler.toModel(dto);
     }
